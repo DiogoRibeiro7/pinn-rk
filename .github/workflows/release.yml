@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write           # needed to push tags and CHANGELOG.md
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "1.8.3"
+
+      - name: Install semantic-release
+        run: |
+          poetry self add "poetry-dynamic-versioning[plugin]" || true  # optional
+          pip install python-semantic-release==9.*
+
+      - name: Semantic Release (version, changelog, tag, GitHub release)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # provided by GitHub; sufficient for releases
+        run: semantic-release publish
