@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "pinn-rk"
+version = "0.1.0"
+description = "Runge–Kutta Physics-Informed Neural Networks with time-discrete losses (Gauss/Radau/Lobatto) in PyTorch."
+authors = ["Diogo Ribeiro <dfr@esmad.ipp.pt>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "pinn_rk", from = "src" }]
+keywords = ["pinn", "runge-kutta", "scientific-ml", "numerical-pde", "torch", "parabolic-pde"]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+numpy = "^2.0.0"
+torch = "^2.3.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+pytest-cov = "^5.0.0"
+mypy = "^1.10.0"
+ruff = "^0.6.0"
+types-python-dateutil = "^2.9.0.20240316" # example types if needed
+pre-commit = "^3.8.0"
+bandit = "^1.7.9"
+
+[tool.ruff]
+extend = "_.ruff.toml"
+
+[tool.pytest.ini_options]
+addopts = "-q --cov=pinn_rk --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+pretty = true
+show_error_codes = true
+namespace_packages = true
+ignore_missing_imports = true
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
