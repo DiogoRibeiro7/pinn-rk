@@ -27,6 +27,7 @@ extend = "_.ruff.toml"
 
 [tool.pytest.ini_options]
 addopts = "-q --cov=pinn_rk --cov-report=term-missing"
+testpaths = ["tests"]
 
 [tool.mypy]
 python_version = "3.11"

@@ -29,7 +29,7 @@ jobs:
         with:
           poetry-version: "1.8.3"
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           poetry env use ${{ matrix.python-version }}
           poetry install --no-interaction
