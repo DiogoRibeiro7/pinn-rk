@@ -1,5 +1,7 @@
-[lint]
 line-length = 100
+target-version = "py311"
+
+[lint]
 select = ["E", "F", "I", "UP", "B", "C4", "T20", "RUF"]
 ignore = [
     "E501",    # Line too long (handled by formatter)
@@ -14,5 +16,3 @@ ignore = [
 "src/pinn_rk/examples/*.py" = ["T201"]
 # Relax some rules for tests
 "tests/*.py" = ["T201"]
-
-target-version = "py311"
