@@ -3,6 +3,7 @@ from __future__ import annotations
 import torch
 from torch import Tensor
 
+
 def barycentric_weights(nodes: Tensor) -> Tensor:
     """
     Compute first-form barycentric weights for Lagrange interpolation.

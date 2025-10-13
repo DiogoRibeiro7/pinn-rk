@@ -1,14 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Callable, Literal, Optional, Tuple
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from typing import Literal
+
 import torch
-from torch import Tensor, device as _device
+from torch import Tensor
+from torch import device as _device
 
 from .mesh import TimeMesh
 from .tableau import ButcherTableau
 
 SpatialSampler = Callable[[int, _device], Tensor]
+
 
 @dataclass
 class RkPinnConfig:
@@ -18,7 +22,7 @@ class RkPinnConfig:
     Attributes
     ----------
     tableau:
-        Runge–Kutta method encoded as a Butcher tableau.
+        Runge-Kutta method encoded as a Butcher tableau.
     time_mesh:
         Time discretization [0,T] -> {t_n}.
     q_aux:
@@ -34,11 +38,12 @@ class RkPinnConfig:
     init_data:
         Optional tuple (x0, u0(x0)) to impose initial H¹ seminorm penalty.
     """
+
     tableau: ButcherTableau
     time_mesh: TimeMesh
     q_aux: Literal["same", "extend"] = "same"
-    spatial_sampler: Optional[SpatialSampler] = None
+    spatial_sampler: SpatialSampler | None = None
     n_x_train: int = 256
-    device: _device = torch.device("cpu")
+    device: _device = field(default_factory=lambda: torch.device("cpu"))
     dtype: torch.dtype = torch.float64
-    init_data: Optional[Tuple[Tensor, Tensor]] = None
+    init_data: tuple[Tensor, Tensor] | None = None

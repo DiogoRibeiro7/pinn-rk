@@ -2,19 +2,19 @@ from __future__ import annotations
 
 import math
 from typing import Literal
+
 import torch
-from torch import nn, Tensor
+from torch import Tensor, nn
 
 from pinn_rk import (
-    ButcherTableau,
-    RkPinnConfig,
-    TimeMesh,
     MLP,
     Laplacian1D,
+    RkPinnConfig,
     RkPinnLoss,
+    TimeMesh,
     butcher_gauss_legendre_q2,
-    butcher_radau_iia_q2,
     butcher_lobatto_iiia_q2,
+    butcher_radau_iia_q2,
 )
 
 # --- Exact manufactured solution for validation ---

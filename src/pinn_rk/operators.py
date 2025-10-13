@@ -1,7 +1,10 @@
 from __future__ import annotations
+
+from typing import Protocol
+
 import torch
 from torch import Tensor
-from typing import Protocol
+
 
 class EllipticOperator(Protocol):
     def __call__(self, x: Tensor, u: Tensor) -> Tensor: ...

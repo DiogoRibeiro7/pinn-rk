@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import torch
+
 from pinn_rk.interpolants import barycentric_weights, lagrange_eval
 
 

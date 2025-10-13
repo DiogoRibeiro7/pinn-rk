@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import torch
+
 from pinn_rk.tableau import (
     ButcherTableau,
     butcher_gauss_legendre_q2,
-    butcher_radau_iia_q2,
     butcher_lobatto_iiia_q2,
+    butcher_radau_iia_q2,
 )
 
 

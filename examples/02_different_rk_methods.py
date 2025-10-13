@@ -17,19 +17,19 @@ from __future__ import annotations
 import argparse
 import math
 import time
-from typing import Dict, List, Tuple
+
 import torch
-from torch import nn, Tensor
+from torch import Tensor, nn
 
 from pinn_rk import (
-    RkPinnConfig,
-    TimeMesh,
     MLP,
     Laplacian1D,
+    RkPinnConfig,
     RkPinnLoss,
+    TimeMesh,
     butcher_gauss_legendre_q2,
-    butcher_radau_iia_q2,
     butcher_lobatto_iiia_q2,
+    butcher_radau_iia_q2,
 )
 
 
@@ -43,7 +43,7 @@ def source_term(x: Tensor, t: Tensor) -> Tensor:
     return torch.zeros_like(x)
 
 
-def make_initial_data(n_points: int, device: torch.device) -> Tuple[Tensor, Tensor]:
+def make_initial_data(n_points: int, device: torch.device) -> tuple[Tensor, Tensor]:
     """Create initial condition data."""
     x0 = torch.linspace(1e-6, 1 - 1e-6, n_points, device=device, dtype=torch.float64)
     x0 = x0.unsqueeze(1)
@@ -76,7 +76,7 @@ def train_with_method(
     steps: int,
     lr: float,
     device: torch.device,
-) -> Tuple[nn.Module, float, float]:
+) -> tuple[nn.Module, float, float]:
     """Train model with specified RK method and return model, error, and training time."""
     torch.set_default_dtype(torch.float64)
     
@@ -131,7 +131,7 @@ def train_with_method(
 
 
 def compare_methods(
-    methods: List[str],
+    methods: list[str],
     T: float,
     N: int,
     n_x_train: int,
@@ -139,7 +139,7 @@ def compare_methods(
     lr: float,
     device: torch.device,
     verbose: bool = True,
-) -> Dict[str, Dict[str, float]]:
+) -> dict[str, dict[str, float]]:
     """Compare multiple RK methods."""
     results = {}
     
@@ -151,7 +151,7 @@ def compare_methods(
     
     if verbose:
         print("=" * 70)
-        print(f"Comparing RK Methods on Heat Equation")
+        print("Comparing RK Methods on Heat Equation")
         print(f"Configuration: T={T}, N={N}, steps={steps}, device={device}")
         print("=" * 70)
         print()
@@ -178,7 +178,7 @@ def compare_methods(
     return results
 
 
-def print_comparison_table(results: Dict[str, Dict[str, float]]) -> None:
+def print_comparison_table(results: dict[str, dict[str, float]]) -> None:
     """Print formatted comparison table."""
     print("=" * 70)
     print("COMPARISON RESULTS")

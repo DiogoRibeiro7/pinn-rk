@@ -18,15 +18,16 @@ from __future__ import annotations
 
 import argparse
 import math
+
 import torch
-from torch import nn, Tensor
+from torch import Tensor, nn
 
 from pinn_rk import (
-    RkPinnConfig,
-    TimeMesh,
     MLP,
     Laplacian1D,
+    RkPinnConfig,
     RkPinnLoss,
+    TimeMesh,
     butcher_radau_iia_q2,
 )
 
@@ -166,7 +167,7 @@ def main():
     error = compute_l2_error(model, T=args.T, n_points=1001, device=device)
     
     if not args.quiet:
-        print(f"\nResults:")
+        print("\nResults:")
         print(f"L2 error at T={args.T}: {error:.3e}")
         
         # Classification of result quality

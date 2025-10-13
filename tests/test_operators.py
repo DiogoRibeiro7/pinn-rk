@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import torch
-from torch import Tensor
+
 from pinn_rk.model import MLP
 from pinn_rk.operators import Laplacian1D
 

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import List
 import torch
-from torch import nn, Tensor
+from torch import Tensor, nn
+
 
 class MLP(nn.Module):
     """
@@ -13,7 +13,7 @@ class MLP(nn.Module):
         if in_dim != 2:
             raise ValueError("MLP expects in_dim=2 (x,t).")
         act_cls = nn.Tanh if activation == "tanh" else nn.SiLU
-        layers: List[nn.Module] = []
+        layers: list[nn.Module] = []
         d = in_dim
         for _ in range(depth):
             layers += [nn.Linear(d, width), act_cls()]

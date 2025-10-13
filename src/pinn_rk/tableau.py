@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Final
-import math
+
 import torch
 from torch import Tensor
+
 
 @dataclass(frozen=True)
 class ButcherTableau:

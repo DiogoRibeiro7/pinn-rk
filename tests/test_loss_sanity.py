@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import math
+
 import torch
-from torch import nn, Tensor
+from torch import Tensor
 
 from pinn_rk.config import RkPinnConfig
+from pinn_rk.loss import RkPinnLoss
 from pinn_rk.mesh import TimeMesh
 from pinn_rk.model import MLP
 from pinn_rk.operators import Laplacian1D
 from pinn_rk.tableau import butcher_radau_iia_q2
-from pinn_rk.loss import RkPinnLoss
 
 
 @torch.no_grad()

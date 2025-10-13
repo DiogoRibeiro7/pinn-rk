@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import torch
-from pinn_rk.examples.train_heat_equation import train_heat_equation, l2_error
+
+from pinn_rk.examples.train_heat_equation import l2_error, train_heat_equation
 
 
 def test_train_and_error_small_run() -> None:
