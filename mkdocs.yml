@@ -1,0 +1,184 @@
+site_name: pinn-rk Documentation
+site_description: Runge-Kutta Physics-Informed Neural Networks in PyTorch
+site_author: Diogo Ribeiro
+site_url: https://diogoribeiro7.github.io/pinn-rk
+
+repo_url: https://github.com/diogoribeiro7/pinn-rk
+repo_name: diogoribeiro7/pinn-rk
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2025 Diogo Ribeiro
+
+theme:
+  name: material
+  language: en
+  palette:
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+  font:
+    text: Roboto
+    code: Roboto Mono
+  
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - search.share
+    - toc.integrate
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  
+  icon:
+    repo: fontawesome/brands/github
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: true
+            show_object_full_path: false
+            show_category_heading: true
+            show_if_no_docstring: false
+            show_signature: true
+            show_signature_annotations: true
+            separate_signature: true
+            members_order: source
+            group_by_category: true
+            show_submodules: false
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Basic Concepts: getting-started/concepts.md
+  - Theory:
+    - Mathematical Background: theory/mathematical-background.md
+    - RK-PINN Formulation: theory/rk-pinn-formulation.md
+    - Boundary Conditions: theory/boundary-conditions.md
+  - User Guide:
+    - Configuration: guide/configuration.md
+    - Training Models: guide/training.md
+    - Custom Operators: guide/custom-operators.md
+    - Error Analysis: guide/error-analysis.md
+  - API Reference:
+    - Configuration: api/config.md
+    - Butcher Tableaux: api/tableau.md
+    - Time Mesh: api/mesh.md
+    - Interpolants: api/interpolants.md
+    - Operators: api/operators.md
+    - Models: api/model.md
+    - Loss Functions: api/loss.md
+  - Examples:
+    - Overview: examples/overview.md
+    - Heat Equation: examples/heat-equation.md
+    - Comparing Methods: examples/comparing-methods.md
+    - Custom PDEs: examples/custom-pde.md
+  - Development:
+    - Contributing: contributing.md
+    - Roadmap: roadmap.md
+    - Changelog: changelog.md
+
+markdown_extensions:
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
+  
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: "material.extensions.emoji.twemoji"
+      emoji_generator: "material.extensions.emoji.to_svg"
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.snippets
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/diogoribeiro7/pinn-rk
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pinn-rk/
+  analytics:
+    provider: google
+    property: ""
+  version:
+    provider: mike
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js

@@ -1,0 +1,34 @@
+# CODEOWNERS file for pinn-rk
+# 
+# This file defines individuals or teams responsible for code in the repository.
+# When a PR modifies files matching a pattern, the specified owners are 
+# automatically requested for review.
+#
+# More info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+# This will be the fallback for any files not matched by rules below
+* @diogoribeiro7
+
+# Core library components
+/src/pinn_rk/*.py @diogoribeiro7
+
+# Runge-Kutta tableaux and numerical methods
+/src/pinn_rk/tableau.py @diogoribeiro7
+/src/pinn_rk/interpolants.py @diogoribeiro7
+
+# PDE operators and differential operators
+/src/pinn_rk/operators.py @diogoribeiro7
+
+# Loss functions and training
+/src/pinn_rk/loss.py @diogoribeiro7
+/src/pinn_rk/model.py @diogoribeiro7
+
+# Time mesh and discretization
+/src/pinn_rk/mesh.py @diogoribeiro7
+
+# Configuration
+/src/pinn_rk/config.py @diogoribeiro7
+
+# Examples and tutorials
+/src/pinn_rk/examples/ @diogoribeiro7

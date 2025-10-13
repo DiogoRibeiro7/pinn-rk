@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "pinn-rk: Runge-Kutta Physics-Informed Neural Networks"
+version: 0.1.0
+date-released: 2025-01-15
+authors:
+  - family-names: "Ribeiro"
+    given-names: "Diogo"
+    email: "dfr@esmad.ipp.pt"
+    affiliation: "ESMAD - Polytechnic Institute of Porto"
+    orcid: "https://orcid.org/0009-0001-2022-7072"
+repository-code: "https://github.com/diogoribeiro7/pinn-rk"
+url: "https://github.com/diogoribeiro7/pinn-rk"
+abstract: >-
+  A PyTorch library for solving time-dependent partial differential equations
+  using Runge-Kutta Physics-Informed Neural Networks (RK-PINNs). The library
+  implements time-discrete loss formulations using Gauss-Legendre, Radau IIA,
+  and Lobatto IIIA collocation methods with boundary-conditioned neural ansatz.
+keywords:
+  - physics-informed neural networks
+  - PINN
+  - Runge-Kutta methods
+  - scientific machine learning
+  - partial differential equations
+  - PDE
+  - deep learning
+  - PyTorch
+  - numerical methods
+  - parabolic PDEs
+license: MIT
+preferred-citation:
+  type: software
+  title: "pinn-rk: Runge-Kutta Physics-Informed Neural Networks"
+  authors:
+    - family-names: "Ribeiro"
+      given-names: "Diogo"
+      email: "dfr@esmad.ipp.pt"
+  year: 2025
+  version: 0.1.0
+  repository-code: "https://github.com/diogoribeiro7/pinn-rk"
+  license: MIT

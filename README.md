@@ -1,12 +1,16 @@
 # pinn-rk
 
-Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete losses** in PyTorch. Supports Gauss, Radau IIA, and Lobatto IIIA Runge–Kutta schemes via Butcher tableaux, with boundary-conditioned neural ansatz and an end‑to‑end example for the 1D heat equation.
-
-<p align="left">
-  <a href="#"><img alt="CI" src="https://img.shields.io/badge/CI-GitHub_Actions-blue"></a>
-  <a href="#"><img alt="Python" src="https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-3776AB"></a>
-  <a href="#"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+<p align="center">
+  <a href="https://github.com/diogoribeiro7/pinn-rk/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/diogoribeiro7/pinn-rk/workflows/CI/badge.svg"></a>
+  <a href="https://codecov.io/gh/diogoribeiro7/pinn-rk"><img alt="Coverage" src="https://codecov.io/gh/diogoribeiro7/pinn-rk/branch/main/graph/badge.svg"></a>
+  <a href="https://pypi.org/project/pinn-rk/"><img alt="PyPI" src="https://img.shields.io/pypi/v/pinn-rk"></a>
+  <a href="https://pypi.org/project/pinn-rk/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/pinn-rk"></a>
+  <a href="https://github.com/diogoribeiro7/pinn-rk/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+  <a href="https://github.com/psf/black"><img alt="Code style: ruff" src="https://img.shields.io/badge/code%20style-ruff-000000.svg"></a>
+  <a href="https://github.com/diogoribeiro7/pinn-rk"><img alt="Downloads" src="https://img.shields.io/pypi/dm/pinn-rk"></a>
 </p>
+
+Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete losses** in PyTorch. Supports Gauss, Radau IIA, and Lobatto IIIA Runge–Kutta schemes via Butcher tableaux, with boundary-conditioned neural ansatz and an end‑to‑end example for the 1D heat equation.
 
 > See **[ROADMAP.md](./ROADMAP.md)** for milestones and planned features.
 
@@ -16,7 +20,7 @@ Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete 
 
 * **Time‑discrete residual** built from Runge–Kutta collocation: residuals evaluated at stage nodes and integrated with RK weights.
 * **General RK backend** via `ButcherTableau` (Gauss/Radau/Lobatto included; easily extensible).
-* **Boundary conditioning** through a multiplicative factor (\Phi(x)) to satisfy homogeneous Dirichlet BCs exactly.
+* **Boundary conditioning** through a multiplicative factor (Φ(x)) to satisfy homogeneous Dirichlet BCs exactly.
 * **Modular PDE operators** (e.g., `Laplacian1D`) with autograd‑based derivatives.
 * **Practical implementation**: type hints, ruff/mypy clean, tests, and GitHub Actions CI.
 
@@ -39,7 +43,7 @@ pre-commit install
 Train on the 1D heat equation (u_t - u_{xx} = 0) on ((0,1)) with homogeneous Dirichlet BCs and initial condition (u_0(x) = \sin(\pi x)):
 
 ```python
-from pinn_rk import train_heat_equation, l2_error
+from pinn_rk.examples.train_heat_equation import train_heat_equation, l2_error
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -75,7 +79,7 @@ Here, (\hat u) is a polynomial time interpolant on each slab and (\Pi_{q-1}, \ti
 
 ## Package layout
 
-```
+```plaintext
 src/pinn_rk/
 ├─ rk_pinn.py       # core loss, RK tableaux, model, training utilities
 ├─ operators.py     # elliptic operators (e.g., Laplacian1D)
@@ -165,22 +169,64 @@ Training the heat‑equation example for ~1k–5k steps typically reaches (L^2) 
 
 ---
 
-## Roadmap
+## Contributing
 
-* [ ] Higher‑order Gauss/Radau/Lobatto (q≥3)
-* [ ] Analytic time‑derivative of the interpolant (replace finite differences)
-* [ ] 2D/3D operators and manufactured‑solution suites
-* [ ] Optional cG/dG time discretizations under the same pointwise form
-* [ ] Example notebooks and visualization utilities
+Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+Key points:
+
+- Follow code style (ruff, mypy)
+- Add tests for new features
+- Update documentation and CHANGELOG
+- Use conventional commit messages
 
 ---
 
-## Contributing
+## Citation
 
-Contributions are welcome! Please open an issue or a pull request. The project follows Conventional Commits and includes ruff/mypy/pytest checks via pre‑commit and CI.
+If you use this software in your research, please cite it:
+
+```bibtex
+@software{ribeiro2025pinnrk,
+  author = {Ribeiro, Diogo},
+  title = {pinn-rk: Runge-Kutta Physics-Informed Neural Networks},
+  year = {2025},
+  url = {https://github.com/diogoribeiro7/pinn-rk},
+  version = {0.1.0}
+}
+```
+
+Or see [CITATION.cff](./CITATION.cff) for the full citation information.
 
 ---
 
 ## License
 
-This project is licensed under the MIT License. See `LICENSE` for details.
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+
+---
+
+## Roadmap
+
+See [ROADMAP.md](./ROADMAP.md) for planned features including:
+
+- Higher-order RK methods (q≥3)
+- 2D/3D operators
+- Adaptive time stepping
+- Additional boundary conditions
+- Documentation website
+
+---
+
+## Acknowledgments
+
+This work builds upon research in Physics-Informed Neural Networks and time-stepping methods for PDEs.
+
+---
+
+## Support
+
+- 📖 [Documentation](https://github.com/diogoribeiro7/pinn-rk)
+- 🐛 [Issue Tracker](https://github.com/diogoribeiro7/pinn-rk/issues)
+- 💬 [Discussions](https://github.com/diogoribeiro7/pinn-rk/discussions)
+- 📧 Contact: [dfr@esmad.ipp.pt](mailto:dfr@esmad.ipp.pt)

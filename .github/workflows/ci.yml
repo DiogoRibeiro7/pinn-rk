@@ -5,9 +5,13 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
 
 jobs:
   test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -16,9 +20,10 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
@@ -29,16 +34,281 @@ jobs:
         with:
           poetry-version: "1.8.3"
 
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-${{ matrix.python-version }}-
+
       - name: Install dependencies
         run: |
           poetry env use ${{ matrix.python-version }}
-          poetry install --no-interaction
+          poetry install --no-interaction --no-root
 
-      - name: Lint (ruff)
-        run: poetry run ruff check .
+      - name: Install project
+        run: poetry install --no-interaction
 
-      - name: Type check (mypy)
+      - name: Lint with ruff
+        run: poetry run ruff check . --output-format=github
+
+      - name: Type check with mypy
         run: poetry run mypy src
 
-      - name: Test
-        run: poetry run pytest
+      - name: Security check with bandit
+        run: poetry run bandit -r src -f json -o bandit-report.json
+        continue-on-error: true
+
+      - name: Upload bandit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report-${{ matrix.os }}-${{ matrix.python-version }}
+          path: bandit-report.json
+
+      - name: Run tests with coverage
+        run: |
+          poetry run pytest --cov=pinn_rk --cov-report=xml --cov-report=term-missing --cov-report=html --junitxml=junit.xml -v
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-${{ matrix.os }}-${{ matrix.python-version }}
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
+          path: |
+            junit.xml
+            htmlcov/
+
+      - name: Upload coverage HTML
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: htmlcov/
+
+  lint-only:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "1.8.3"
+          
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --only dev
+          
+      - name: Check code formatting
+        run: poetry run ruff format --check .
+        
+      - name: Lint with ruff
+        run: poetry run ruff check . --output-format=github
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "1.8.3"
+          
+      - name: Install dependencies
+        run: poetry install --no-interaction
+          
+      - name: Type check with mypy
+        run: poetry run mypy src --junit-xml mypy-report.xml
+        
+      - name: Upload mypy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mypy-report
+          path: mypy-report.xml
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "1.8.3"
+          
+      - name: Install dependencies
+        run: poetry install --no-interaction --only dev
+          
+      - name: Run bandit security scan
+        run: |
+          poetry run bandit -r src -f json -o bandit-report.json || true
+          poetry run bandit -r src -f screen
+        continue-on-error: true
+        
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: bandit-report.json
+
+  docs:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          
+      - name: Install dependencies
+        run: |
+          pip install pydocstyle
+          
+      - name: Check docstring style
+        run: pydocstyle src/pinn_rk --convention=numpy
+        continue-on-error: true
+
+  build:
+    name: Build Distribution
+    runs-on: ubuntu-latest
+    needs: [test, lint-only, type-check]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "1.8.3"
+          
+      - name: Build package
+        run: poetry build
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  test-install:
+    name: Test Package Installation
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          
+      - name: Install wheel
+        run: |
+          pip install dist/*.whl
+          
+      - name: Test import
+        run: |
+          python -c "import pinn_rk; print(f'Successfully imported pinn-rk v{pinn_rk.__version__}')"
+          
+      - name: Test basic functionality
+        run: |
+          python -c "
+          import torch
+          from pinn_rk import butcher_radau_iia_q2, TimeMesh
+          bt = butcher_radau_iia_q2()
+          mesh = TimeMesh.uniform(T=0.1, N=10)
+          print('Basic functionality test passed')
+          "
+
+  coverage-report:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download coverage reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          merge-multiple: true
+          
+      - name: Comment coverage on PR
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+        continue-on-error: true
+
+  all-checks-pass:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [test, lint-only, type-check, security, build, test-install]
+    if: always()
+    
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.lint-only.result }}" != "success" ] || \
+             [ "${{ needs.type-check.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ] || \
+             [ "${{ needs.test-install.result }}" != "success" ]; then
+            echo "One or more checks failed"
+            exit 1
+          fi
+          echo "All checks passed successfully!"

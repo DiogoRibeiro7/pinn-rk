@@ -5,8 +5,26 @@ description = "Runge–Kutta Physics-Informed Neural Networks with time-discrete
 authors = ["Diogo Ribeiro <dfr@esmad.ipp.pt>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://github.com/diogoribeiro7/pinn-rk"
+repository = "https://github.com/diogoribeiro7/pinn-rk"
+documentation = "https://diogoribeiro7.github.io/pinn-rk"
 packages = [{ include = "pinn_rk", from = "src" }]
-keywords = ["pinn", "runge-kutta", "scientific-ml", "numerical-pde", "torch", "parabolic-pde"]
+keywords = ["pinn", "runge-kutta", "scientific-ml", "numerical-pde", "torch", "parabolic-pde", "physics-informed-neural-networks"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/diogoribeiro7/pinn-rk/issues"
+"Discussions" = "https://github.com/diogoribeiro7/pinn-rk/discussions"
+"Changelog" = "https://github.com/diogoribeiro7/pinn-rk/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
@@ -18,16 +36,56 @@ pytest = "^8.2.0"
 pytest-cov = "^5.0.0"
 mypy = "^1.10.0"
 ruff = "^0.6.0"
-types-python-dateutil = "^2.9.0.20240316" # example types if needed
+types-python-dateutil = "^2.9.0.20240316"
 pre-commit = "^3.8.0"
 bandit = "^1.7.9"
 
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.5.0"
+mkdocs-material = "^9.5.0"
+mkdocstrings = {extras = ["python"], version = "^0.24.0"}
+mkdocs-git-revision-date-localized-plugin = "^1.2.0"
+pymdown-extensions = "^10.7.0"
+
+[tool.poetry.group.examples]
+optional = true
+
+[tool.poetry.group.examples.dependencies]
+matplotlib = "^3.8.0"
+jupyter = "^1.0.0"
+plotly = "^5.18.0"
+
 [tool.ruff]
-extend = "_.ruff.toml"
+extend = ".ruff.toml"
 
 [tool.pytest.ini_options]
-addopts = "-q --cov=pinn_rk --cov-report=term-missing"
+addopts = "-q --cov=pinn_rk --cov-report=term-missing --cov-report=xml"
 testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["src/pinn_rk"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
 
 [tool.mypy]
 python_version = "3.11"
@@ -37,6 +95,11 @@ pretty = true
 show_error_codes = true
 namespace_packages = true
 ignore_missing_imports = true
+files = ["src/pinn_rk"]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B101"]  # Skip assert_used in tests
 
 [build-system]
 requires = ["poetry-core>=1.9.0"]
