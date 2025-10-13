@@ -1,181 +1,186 @@
-# pinn-rk • Roadmap
+# pinn-rk
 
-A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑grade library for time‑discrete Runge–Kutta PINNs.
+Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete losses** in PyTorch. Supports Gauss, Radau IIA, and Lobatto IIIA Runge–Kutta schemes via Butcher tableaux, with boundary-conditioned neural ansatz and an end‑to‑end example for the 1D heat equation.
 
----
+<p align="left">
+  <a href="#"><img alt="CI" src="https://img.shields.io/badge/CI-GitHub_Actions-blue"></a>
+  <a href="#"><img alt="Python" src="https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-3776AB"></a>
+  <a href="#"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+</p>
 
-## Phase 0 — Foundations (Now)
-
-**Goal:** Solid engineering baseline.
-
-* [ ] **Module split completed** (✅ code done) and public API re‑exports.
-* [ ] **Tests**: unit, E2E smoke, API surface; coverage target ≥ 85%.
-* [ ] **CI**: ruff, mypy, pytest on 3.10–3.12 and 3 OSs; cache Poetry.
-* [ ] **Repo hygiene**: issue/PR templates, dependabot, CODEOWNERS.
-
-**Deliverables**
-
-* Passing CI on main
-* Coverage badge (Codecov)
-* CONTRIBUTING.md, SECURITY.md
-
-**Acceptance**
-
-* Green CI, coverage ≥ 85%, pre‑commit passes locally.
+> See **[ROADMAP.md](./ROADMAP.md)** for milestones and planned features.
 
 ---
 
-## Phase 1 — Numerical breadth
+## Key features
 
-**Goal:** Expand RK methods and core numerics.
-
-* [ ] **Higher‑order RK**: Gauss, Radau IIA, Lobatto for q=3,4.
-* [ ] **Analytic time derivative** of the Lagrange interpolant (\hat u_t) (replace finite‑diff).
-* [ ] **Sampling strategies**: uniform | Sobol | Halton; stratified in time.
-* [ ] **Operators**: Laplacian2D/3D; rectangular domains.
-* [ ] **Boundary handling options**: hard BC via (\phi(x)) vs soft penalty; switchable.
-
-**Deliverables**
-
-* `tableau.py` with q=3,4 factories
-* `interpolants.py` gains `lagrange_basis_and_derivative`
-* `samplers.py` (optional) with Sobol/Halton
-* New tests (properties + convergence checks)
-
-**Acceptance**
-
-* Interpolation tests: partition of unity, node exactness, derivative agreement
-* Tiny training runs pass with q=3 on CI
+* **Time‑discrete residual** built from Runge–Kutta collocation: residuals evaluated at stage nodes and integrated with RK weights.
+* **General RK backend** via `ButcherTableau` (Gauss/Radau/Lobatto included; easily extensible).
+* **Boundary conditioning** through a multiplicative factor (\Phi(x)) to satisfy homogeneous Dirichlet BCs exactly.
+* **Modular PDE operators** (e.g., `Laplacian1D`) with autograd‑based derivatives.
+* **Practical implementation**: type hints, ruff/mypy clean, tests, and GitHub Actions CI.
 
 ---
 
-## Phase 2 — Convergence, stability & MR‑aligned design
+## Installation (development)
 
-**Goal:** Evidence of correctness and stable training design.
+```bash
+# Using Poetry (recommended)
+poetry install
+pre-commit install
+```
 
-* [ ] **Convergence harness**: sweep (N, steps) and RK (Gauss/Radau/Lobatto); save CSV + plots.
-* [ ] **Manufactured solutions**: 1D/2D with non‑zero (f), time‑varying BCs.
-* [ ] **Error norms**: L2 and H1 utilities; optional final‑time H1 penalty.
-* [ ] **Ablations**: BC enforcement (hard vs soft), sampler choice, RK scheme.
-
-**Deliverables**
-
-* `bench/` with scripts + results; `notebooks/benchmarks.ipynb`
-* `pinn_rk/metrics.py` with L2/H1 estimators
-
-**Acceptance**
-
-* Plots showing expected rate trends vs RK order (qualitative)
-* Reproducible runs via documented seed & config
+> Requires Python 3.10–3.12. Install a CPU or CUDA build of PyTorch appropriate for your environment.
 
 ---
 
-## Phase 3 — Performance engineering
+## Quick start
 
-**Goal:** Faster training without compromising clarity.
+Train on the 1D heat equation (u_t - u_{xx} = 0) on ((0,1)) with homogeneous Dirichlet BCs and initial condition (u_0(x) = \sin(\pi x)):
 
-* [ ] **`torch.compile`** flag (AOTAutograd) + fallbacks.
-* [ ] **AMP** (mixed precision) on CUDA; autocast context in training helpers.
-* [ ] **Profiler recipe**: `torch.profiler` traces + README guidance.
-* [ ] Micro‑optimisations: reduce graph breaks, reuse buffers, JIT small kernels if helpful.
+```python
+from pinn_rk import train_heat_equation, l2_error
+import torch
 
-**Deliverables**
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = train_heat_equation(
+    method="radau2",   # "gauss2" | "radau2" | "lobatto2"
+    T=0.1,
+    N=20,
+    n_x_train=256,
+    steps=1000,
+    lr=2e-3,
+    device=device,
+)
+print("L2(T=0.1) =", l2_error(model, T=0.1, nx=1001, device=device))
+```
 
-* `training.py` with compile/AMP toggles
-* `docs/performance.md` with profiler screenshots
-
-**Acceptance**
-
-* Documented wall‑clock improvements on reference run (≥ 1.3× on CUDA in AMP mode)
-
----
-
-## Phase 4 — Documentation site
-
-**Goal:** Publish high‑quality docs.
-
-* [ ] **MkDocs Material** site with:
-
-  * Guide: concepts, RK loss construction, BC strategies
-  * Tutorials: 1D heat, 2D Poisson‑type, custom RHS/BCs
-  * API reference via mkdocstrings
-* [ ] **Examples gallery** (plots, error tables)
-* [ ] **Links** to paper(s) and comparisons
-
-**Deliverables**
-
-* `docs/` + `mkdocs.yml`; CI job to build; optional Pages deploy
-
-**Acceptance**
-
-* Clean site build; internal links validated; examples runnable
+Expected output (ballpark): `L2(T=0.1) ~ 1e-2 … 1e-1` depending on training steps and hardware.
 
 ---
 
-## Phase 5 — Extended time discretisations (optional)
+## Concept overview
 
-**Goal:** Generalise time‑discrete PINN beyond RK.
+We consider linear parabolic PDEs of the form
 
-* [ ] **cG/dG in time** under the same pointwise form
-* [ ] Quadrature & projection backends for cG/dG
-* [ ] Unified loss interface: `backend = {"rk","cg","dg"}`
+[ u_t + \mathcal{L} u = f \quad \text{in } \Omega\times(0,T], \qquad u=0 \text{ on } \partial\Omega, \qquad u(\cdot,0)=u_0. ]
 
-**Deliverables**
+The time interval is partitioned into slabs (J_n=[t_n,t_{n+1}]) with step (k_n). For a (q)-stage RK method with nodes (c_i), we form **stage times** (t_{n,i}=t_n + c_i k_n) and evaluate the network (u_\theta(x,t)) and operator (\mathcal{L} u_\theta) at these times. The **discrete RK residual** is accumulated using the quadrature weights (b_i):
 
-* `timebackends/` with rk/cg/dg implementations
-* Examples comparing RK vs cG/dG
+[ \int_{J_n} | r(t) |^2 dt ;\approx; k_n \sum_{i=1}^q b_i, | r(t_{n,i}) |^2,\quad r := \partial_t \hat u + \Pi_{q-1}(\mathcal{L}\hat u) - \tilde\Pi_{q-1} f. ]
 
-**Acceptance**
-
-* Smoke tests for cg/dg; convergence harness includes cg/dg sweeps
+Here, (\hat u) is a polynomial time interpolant on each slab and (\Pi_{q-1}, \tilde\Pi_{q-1}) are degree (q-1) projections realized at collocation nodes.
 
 ---
 
-## Phase 6 — Packaging & releases
+## Package layout
 
-**Goal:** Stable releases with changelog and tags.
-
-* [ ] **Semantic‑release** (Poetry): versioning, changelog, GitHub releases
-* [ ] **Wheels** build + `python -m pip install pinn-rk` sanity
-* [ ] **Badges**: PyPI, version, downloads
-
-**Deliverables**
-
-* Release pipeline in CI (`release` job on main)
-
-**Acceptance**
-
-* `v0.2.0` released with notes summarising Phases 1–3
+```
+src/pinn_rk/
+├─ rk_pinn.py       # core loss, RK tableaux, model, training utilities
+├─ operators.py     # elliptic operators (e.g., Laplacian1D)
+├─ __init__.py      # public API
+└─ __about__.py     # version
+```
 
 ---
 
-## Stretch goals
+## API reference (essentials)
 
-* [ ] Domain‑specific samplers (e.g., boundary‑biased)
-* [ ] Adaptive time partition (local error indicator)
-* [ ] PDE suites: advection‑diffusion, reaction‑diffusion, Burgers (viscous)
-* [ ] Optional JAX backend for research comparisons
+### `ButcherTableau`
+
+**Purpose.** Encodes a Runge–Kutta method.
+
+* **Fields:** `A: Tensor [q,q]`, `b: Tensor [q]`, `c: Tensor [q]`.
+* **Factories:**
+
+  * `butcher_gauss_legendre_q2()` – order 4, 2 stages
+  * `butcher_radau_iia_q2()` – order 3, 2 stages
+  * `butcher_lobatto_iiia_q2()` – trapezoidal rule, 2 stages
+
+### `TimeMesh`
+
+**Purpose.** Uniform or user‑defined partition of ([0,T]).
+
+* `TimeMesh.uniform(T: float, N: int, device) -> TimeMesh`
+* Fields: `nodes: Tensor [N+1]`, `steps: Tensor [N]`.
+
+### `MLP`
+
+**Purpose.** Network (g_\theta(x,t)) used inside the boundary‑conditioned ansatz
+(u_\theta(x,t) = \Phi(x), g_\theta(x,t)) with (\Phi(x)=x(1-x)).
+
+* `MLP(in_dim=2, width=128, depth=4, activation="tanh")`
+
+### `RkPinnConfig`
+
+**Purpose.** Configuration for assembling the time‑discrete loss.
+
+* Key fields: `tableau`, `time_mesh`, `n_x_train`, `spatial_sampler`, `init_data`.
+
+### `RkPinnLoss`
+
+**Purpose.** Computes the RK‑PINN time‑discrete objective over all slabs.
+
+* `RkPinnLoss(model, Lop, f_rhs, cfg)`
+* Call to compute scalar loss: `loss = loss_fn()`
+
+### Utilities
+
+* `train_heat_equation(...) -> nn.Module` – reference training routine.
+* `l2_error(model, T, nx=1001, device) -> float` – (L^2) error at final time.
 
 ---
 
-## Issue seeds (copy/paste to GitHub)
+## Choosing the RK scheme
 
-* feat: add Radau IIA q=3 tableau + unit tests
-* feat: implement analytic Lagrange derivative; replace FD in loss
-* feat: Sobol sampler; config hook and tests
-* feat: Laplacian2D/3D + manufactured solutions
-* test: property‑based tests for interpolation & derivatives (Hypothesis)
-* perf: torch.compile + AMP toggle and benchmarks
-* docs: MkDocs site with tutorials and API
-* bench: convergence harness and plots
-* release: semantic‑release setup and first tagged release
+* **`gauss2`** (Gauss–Legendre): higher order, A‑stable; good accuracy per stage.
+* **`radau2`** (Radau IIA): L‑stable; robust for stiff operators (recommended default).
+* **`lobatto2`** (Lobatto IIIA): trapezoidal rule; symmetric, A‑stable.
+
+Switch via the `method` argument in `train_heat_equation`.
 
 ---
 
-## Versioning plan
+## Extending the library
 
-* **v0.1.x** – Foundations + q=2 RK + tests/CI
-* **v0.2.x** – Phase 1–3 features, docs draft
-* **v0.3.x** – cG/dG optional backends, broader PDE gallery
-* **v1.0.0** – Stable API, documented guarantees, benchmarks
+1. **Add RK variants.** Implement additional `ButcherTableau` factories (e.g., Gauss q=3, Radau IIA q=3). No other code changes required.
+2. **New PDE operators.** Create a class implementing the `EllipticOperator` protocol and supply it to `RkPinnLoss`.
+3. **Initial/boundary data.** Replace `init_data` and/or change the boundary factor (\Phi) for different domains/BCs.
+4. **Right‑hand side.** Provide a custom `f_rhs(x,t)` callable.
 
+---
+
+## Reproducibility & testing
+
+* Unit tests live in `tests/` and cover training sanity and error bounds.
+* Set environment variables as needed for deterministic PyTorch runs (note some CUDA ops are non‑deterministic).
+* CI runs `ruff`, `mypy`, and `pytest` on Linux, macOS, and Windows across multiple Python versions.
+
+---
+
+## Benchmarks (indicative)
+
+Training the heat‑equation example for ~1k–5k steps typically reaches (L^2) errors between `1e-2` and `1e-1` at `T=0.1`, depending on the RK scheme and batch sizes. Use `radau2` for stability and increase `N` and training `steps` for tighter accuracy.
+
+---
+
+## Roadmap
+
+* [ ] Higher‑order Gauss/Radau/Lobatto (q≥3)
+* [ ] Analytic time‑derivative of the interpolant (replace finite differences)
+* [ ] 2D/3D operators and manufactured‑solution suites
+* [ ] Optional cG/dG time discretizations under the same pointwise form
+* [ ] Example notebooks and visualization utilities
+
+---
+
+## Contributing
+
+Contributions are welcome! Please open an issue or a pull request. The project follows Conventional Commits and includes ruff/mypy/pytest checks via pre‑commit and CI.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for details.
