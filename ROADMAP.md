@@ -178,4 +178,3 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 * **v0.2.x** – Phase 1–3 features, docs draft
 * **v0.3.x** – cG/dG optional backends, broader PDE gallery
 * **v1.0.0** – Stable API, documented guarantees, benchmarks
-
