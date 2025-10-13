@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import cast
 
 import torch
 from torch import Tensor, nn
@@ -52,7 +53,7 @@ class RkPinnLoss(nn.Module):
         # enable higher-order grads if required by L
         x.requires_grad_(self.L.requires_hessian())
         t.requires_grad_(self.L.requires_hessian())
-        return self.model(x, t)
+        return cast(Tensor, self.model(x, t))
 
     def forward(self) -> Tensor:
         device = self.cfg.device

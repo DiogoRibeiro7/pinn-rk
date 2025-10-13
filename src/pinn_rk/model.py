@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import cast
+
 import torch
 from torch import Tensor, nn
 
@@ -8,7 +10,10 @@ class MLP(nn.Module):
     """
     (x,t) -> u(x,t) with boundary conditioning Φ(x)=x(1-x) for homogeneous Dirichlet on [0,1].
     """
-    def __init__(self, in_dim: int = 2, width: int = 128, depth: int = 4, activation: str = "tanh") -> None:
+
+    def __init__(
+        self, in_dim: int = 2, width: int = 128, depth: int = 4, activation: str = "tanh"
+    ) -> None:
         super().__init__()
         if in_dim != 2:
             raise ValueError("MLP expects in_dim=2 (x,t).")
@@ -27,4 +32,4 @@ class MLP(nn.Module):
         xt = torch.cat([x, t], dim=1)
         g = self.net(xt)
         phi = x * (1.0 - x)  # boundary factor
-        return phi * g
+        return cast(Tensor, phi * g)
