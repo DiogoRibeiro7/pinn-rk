@@ -1,0 +1,57 @@
+{
+  "upload_type": "software",
+  "title": "pinn-rk: Runge-Kutta Physics-Informed Neural Networks with time-discrete losses",
+  "creators": [
+    {
+      "name": "Ribeiro, Diogo",
+      "orcid": "0009-0001-2022-7072",
+      "affiliation": "ESMAD - School of Media Arts and Design, Polytechnic of Porto"
+    }
+  ],
+  "description": "<p>A PyTorch library for solving time-dependent partial differential equations with <strong>Runge-Kutta Physics-Informed Neural Networks (RK-PINNs)</strong>.</p><p>Instead of collocating the PDE residual at scattered space-time points, <code>pinn-rk</code> partitions the time interval into slabs and builds a <em>time-discrete</em> loss from Runge-Kutta collocation: the network is evaluated at the stage times of a Butcher tableau, the residual is reconstructed in time by barycentric Lagrange interpolation, and the squared residual is integrated over each slab with the Runge-Kutta quadrature weights.</p><p><strong>Features</strong></p><ul><li>General Runge-Kutta backend via <code>ButcherTableau</code>, with Gauss-Legendre (order 4, A-stable), Radau IIA (order 3, L-stable) and Lobatto IIIA (trapezoidal, A-stable) two-stage tableaux included and further schemes addable without touching the loss.</li><li>Time-discrete residual assembled over a <code>TimeMesh</code> of slabs, with degree q-1 projections realised at the collocation nodes.</li><li>Exact enforcement of homogeneous Dirichlet boundary conditions through a multiplicative ansatz u(x,t) = &#934;(x) g<sub>&#952;</sub>(x,t), so boundary error never enters the optimisation.</li><li>Modular elliptic operators behind an <code>EllipticOperator</code> protocol (1D Laplacian provided), with derivatives taken by autograd.</li><li>Optional H<sup>1</sup>-seminorm penalty on the initial condition.</li><li>Worked end-to-end example on the 1D heat equation against a manufactured solution, with an L<sup>2</sup> error diagnostic at final time.</li></ul><p><strong>Engineering</strong></p><p>Fully type-annotated (mypy strict), linted with ruff, security-scanned with bandit, and tested on Linux, macOS and Windows across Python 3.10-3.12 in GitHub Actions.</p><p><strong>Scope</strong></p><p>The current release targets linear parabolic problems on 1D spatial domains with homogeneous Dirichlet boundary conditions. Higher-order tableaux, 2D/3D operators, adaptive time stepping and further boundary condition types are on the roadmap.</p>",
+  "access_right": "open",
+  "license": "mit",
+  "language": "eng",
+  "keywords": [
+    "physics-informed neural networks",
+    "PINN",
+    "Runge-Kutta methods",
+    "Butcher tableau",
+    "collocation methods",
+    "scientific machine learning",
+    "partial differential equations",
+    "parabolic PDEs",
+    "heat equation",
+    "numerical analysis",
+    "deep learning",
+    "PyTorch",
+    "Python"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/DiogoRibeiro7/rk-pinns",
+      "relation": "isSupplementTo",
+      "scheme": "url",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "https://diogoribeiro7.github.io/rk-pinns",
+      "relation": "isDocumentedBy",
+      "scheme": "url",
+      "resource_type": "publication-softwaredocumentation"
+    },
+    {
+      "identifier": "https://pypi.org/project/pinn-rk/",
+      "relation": "isIdenticalTo",
+      "scheme": "url",
+      "resource_type": "software"
+    }
+  ],
+  "references": [
+    "Raissi, M., Perdikaris, P., & Karniadakis, G. E. (2019). Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of Computational Physics, 378, 686-707.",
+    "Hairer, E., & Wanner, G. (1996). Solving Ordinary Differential Equations II: Stiff and Differential-Algebraic Problems (2nd ed.). Springer.",
+    "Butcher, J. C. (2016). Numerical Methods for Ordinary Differential Equations (3rd ed.). Wiley.",
+    "Berrut, J.-P., & Trefethen, L. N. (2004). Barycentric Lagrange interpolation. SIAM Review, 46(3), 501-517."
+  ],
+  "notes": "Source code, issue tracker and contribution guidelines are hosted on GitHub. Released under the MIT License."
+}
