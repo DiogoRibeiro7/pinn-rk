@@ -135,17 +135,23 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Goal:** Stable releases with changelog and tags.
 
-* [ ] **Semantic‑release** (Poetry): versioning, changelog, GitHub releases
+* [x] **Manual release process**, documented in [CONTRIBUTING.md](./CONTRIBUTING.md#releasing).
+  Semantic-release was tried and dropped: it ran on every push to `main` and failed
+  on each one, and tagging is infrequent enough that the automation cost more than
+  it saved. Revisit only if release frequency rises.
+* [x] **Zenodo archiving**: releases are archived automatically and minted a DOI
+  (concept DOI `10.5281/zenodo.21839391`)
 * [ ] **Wheels** build + `python -m pip install pinn-rk` sanity
 * [ ] **Badges**: PyPI, version, downloads
 
 **Deliverables**
 
-* Release pipeline in CI (`release` job on main)
+* Documented, repeatable manual release checklist
+* CI green on the tagged commit before any release is published
 
 **Acceptance**
 
-* `v0.2.0` released with notes summarising Phases 1–3
+* [x] `v0.1.0` and `v0.2.0` released, archived, and citable by DOI
 
 ---
 
@@ -161,14 +167,15 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 ## Issue seeds (copy/paste to GitHub)
 
 * feat: add Radau IIA q=3 tableau + unit tests
-* feat: implement analytic Lagrange derivative; replace FD in loss
+* ~~feat: implement analytic Lagrange derivative; replace FD in loss~~ — done in v0.2.0
 * feat: Sobol sampler; config hook and tests
 * feat: Laplacian2D/3D + manufactured solutions
 * test: property‑based tests for interpolation & derivatives (Hypothesis)
 * perf: torch.compile + AMP toggle and benchmarks
 * docs: MkDocs site with tutorials and API
 * bench: convergence harness and plots
-* release: semantic‑release setup and first tagged release
+* ~~release: semantic‑release setup and first tagged release~~ — released manually
+  as v0.1.0 and v0.2.0; semantic‑release dropped, see Phase 6
 
 ---
 

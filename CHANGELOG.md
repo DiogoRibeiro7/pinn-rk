@@ -11,6 +11,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Zenodo DOIs, now that the archive exists. The README badge and BibTeX entry, and
   `CITATION.cff`, carry the concept DOI `10.5281/zenodo.21839391`, which always
   resolves to the latest version; the per-version DOIs are recorded alongside it.
+- A documented release checklist in `CONTRIBUTING.md`, covering the four places the
+  version has to agree, why `.zenodo.json` deliberately carries no version field,
+  and the fact that publishing a release mints a DOI and is not reversible.
+
+### Removed
+
+- `.github/workflows/release.yml`. Releases are cut manually. The workflow ran
+  `semantic-release publish` on every push to `main` and failed on each one:
+  python-semantic-release 9.x moves versioning and tagging into
+  `semantic-release version`, and the required `[tool.semantic_release]`
+  configuration was never present. Both releases to date were tagged by hand, so
+  removing it drops nothing that worked.
 
 ## [0.2.0] - 2026-08-07
 

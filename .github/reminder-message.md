@@ -36,7 +36,7 @@ This issue tracks recurring housekeeping for this repository. A bot will add a m
 - [ ] Build artifacts clean: `python -m build`
 - [ ] Metadata valid: `twine check dist/*`
 - [ ] Install test: `pip install dist/*.whl` (or `uv pip install`)
-- [ ] Version bump policy followed (semver / semantic-release)
+- [ ] Version bump policy followed (semver; see the release checklist in CONTRIBUTING.md)
 - [ ] Wheels include correct files (no large/unneeded assets)
 
 ---

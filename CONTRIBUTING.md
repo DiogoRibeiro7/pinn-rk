@@ -280,6 +280,62 @@ pinn-rk/
 └── pyproject.toml        # Dependencies and config
 ```
 
+## Releasing
+
+Releases are cut **manually**. There is deliberately no release workflow: an
+automated one previously ran on every push to `main` and failed on each of them,
+and tagging is infrequent enough that the automation was not worth the
+maintenance. Every release therefore goes through the steps below.
+
+Publishing a release triggers the Zenodo webhook, which archives the tag and
+mints a DOI. That is not reversible, so make sure `main` is green first.
+
+1. **Bump the version in all four places.** They must agree; a mismatch ships a
+   package whose reported version is wrong.
+
+   - `pyproject.toml` → `[tool.poetry] version`
+   - `src/pinn_rk/__about__.py` → `__version__`
+   - `CITATION.cff` → top-level `version`
+   - `CITATION.cff` → `preferred-citation.version`
+
+   Verify:
+
+   ```bash
+   poetry run python - <<'PY'
+   import tomllib, yaml, pinn_rk
+   pv = tomllib.load(open("pyproject.toml", "rb"))["tool"]["poetry"]["version"]
+   c = yaml.safe_load(open("CITATION.cff", encoding="utf-8"))
+   assert pv == pinn_rk.__version__ == str(c["version"]) == str(c["preferred-citation"]["version"])
+   print("versions agree:", pv)
+   PY
+   ```
+
+   Do **not** add a `version` field to `.zenodo.json`. It is omitted on purpose so
+   Zenodo takes the version from the git tag; pinning it there would archive every
+   future release under the pinned value.
+
+2. **Promote the changelog.** Move `[Unreleased]` into a new `## [X.Y.Z] - YYYY-MM-DD`
+   section, leave `[Unreleased]` empty, and update the link definitions at the
+   bottom of the file.
+
+3. **Choose the version honestly.** While the project is `0.x`, bump the minor
+   version for anything that changes what the loss computes, even when no public
+   signature changes — users' trained weights will differ, and that deserves more
+   than a patch bump.
+
+4. **Confirm CI is green on the commit you intend to tag**, then create the release.
+   `gh` creates the tag as part of this.
+
+   ```bash
+   gh release create vX.Y.Z --target main --title "vX.Y.Z — short summary" --notes-file NOTES.md --latest
+   git fetch --tags
+   ```
+
+5. **Record the DOI.** Once Zenodo has archived the release, add the new
+   per-version DOI to the `identifiers` list in `CITATION.cff`. The concept DOI
+   (`10.5281/zenodo.21839391`) never changes and always resolves to the latest
+   version, so the README badge and BibTeX entry need no update.
+
 ## Getting Help
 
 - **Questions**: Open a GitHub Discussion
