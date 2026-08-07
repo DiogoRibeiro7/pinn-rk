@@ -148,9 +148,9 @@ class RkPinnLoss(nn.Module):
             # u0 is supplied as sampled values and carries no autograd history, so the
             # target derivative ∂ₓu₀ is taken numerically on the x0 grid rather than by
             # autograd. Constant w.r.t. θ, hence detached.
-            grad_u0 = torch.gradient(
-                u0.detach().squeeze(1), spacing=(x0.detach().squeeze(1),)
-            )[0].unsqueeze(1)
+            x0_grid = x0.detach().squeeze(1)
+            u0_grid = u0.detach().squeeze(1)
+            grad_u0 = torch.gradient(u0_grid, spacing=(x0_grid,))[0].unsqueeze(1)
             total = total + torch.nn.functional.mse_loss(grad_u, grad_u0)
 
         if not torch.isfinite(total):

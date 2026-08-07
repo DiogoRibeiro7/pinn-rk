@@ -8,9 +8,9 @@ from pinn_rk.model import MLP
 def test_boundary_condition_is_satisfied() -> None:
     device = torch.device("cpu")
     model = MLP(dtype=torch.float64).to(device)
-    x0 = torch.zeros(8, 1, dtype=torch.float64)         # x = 0
-    x1 = torch.ones(8, 1, dtype=torch.float64)          # x = 1
-    t  = torch.linspace(0, 0.1, 8, dtype=torch.float64).unsqueeze(1)
+    x0 = torch.zeros(8, 1, dtype=torch.float64)  # x = 0
+    x1 = torch.ones(8, 1, dtype=torch.float64)  # x = 1
+    t = torch.linspace(0, 0.1, 8, dtype=torch.float64).unsqueeze(1)
 
     with torch.no_grad():
         u0 = model(x0, t)

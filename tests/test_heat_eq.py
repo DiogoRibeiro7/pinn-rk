@@ -12,7 +12,7 @@ def test_train_and_error_small_run() -> None:
         T=0.05,
         N=5,
         n_x_train=64,
-        steps=200,    # short run for CI
+        steps=200,  # short run for CI
         lr=1e-2,
         device=device,
     )

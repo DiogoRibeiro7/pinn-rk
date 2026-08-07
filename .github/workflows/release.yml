@@ -1,8 +1,13 @@
 name: Release
 
+# Manual only. This workflow is not yet functional: it runs
+# `semantic-release publish`, but python-semantic-release 9.x splits versioning
+# and tagging into `semantic-release version`, and `publish` merely uploads
+# assets to an existing release. It also needs a [tool.semantic_release] section
+# in pyproject.toml declaring the two version locations (pyproject and
+# src/pinn_rk/__about__.py). Until both are addressed, releases are cut by hand.
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: write           # needed to push tags and CHANGELOG.md

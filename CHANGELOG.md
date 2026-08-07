@@ -6,32 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-### Added
-
-- `dtype` parameter on `MLP`, so the network's precision is explicit instead of
-  inherited from the global `torch.set_default_dtype` state
-- `pinn_rk.examples` is now a regular package, making
-  `from pinn_rk.examples import train_heat_equation, l2_error` valid
-- Validation of `init_data`: `x0` must be a `[N,1]` tensor sorted in strictly
-  increasing order, which the initial-condition penalty relies on
-- `.zenodo.json` for archival metadata on release
-- `.gitignore`
-
-### Changed
-
-- Renamed the default branch from `develop` to `main`. This also activates the CI
-  and release workflows, which were already configured to trigger on `main` and so
-  had never run.
-
-### Deprecated
-
 - Nothing yet
 
-### Removed
+## [0.1.0] - 2026-08-07
 
-- Nothing yet
+First published release. The package was developed on an unreleased `develop`
+branch and never tagged, so this entry covers both the initial feature set and
+the correctness fixes made before publication.
 
 ### Fixed
+
+Each of the following was present throughout development and is fixed here, in
+the first release to reach users:
 
 - `RkPinnLoss.forward` raised `RuntimeError` on every call: the interpolant
   `torch.einsum` used `1` as a subscript, which is not a valid subscript label.
@@ -42,17 +28,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `MLP` built float32 layers while the loss fed float64 inputs, so constructing a
   model without first calling `torch.set_default_dtype(torch.float64)` failed with
   a dtype mismatch.
-- Badge and documentation links pinned the `main` branch while the default branch
-  was `develop`, so the coverage badge and several file links resolved to nothing.
-  The CI badge also used the deprecated `/workflows/CI/badge.svg` endpoint.
 - README rendered raw LaTeX as literal text, and its package layout described a
   `rk_pinn.py` module that does not exist.
-
-### Security
-
-- Nothing yet
-
-## [0.1.0] - 2025-01-XX
+- CI never ran: the `test` job requested Poetry-based dependency caching before
+  installing Poetry, and no workflow triggered on the actual default branch.
 
 ### Added
 
@@ -73,7 +52,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `RkPinnLoss`: Time-discrete RK-PINN loss function
   - `RkPinnConfig`: Configuration dataclass
 
-- Barycentric Lagrange interpolation for polynomial reconstruction
+- Barycentric Lagrange interpolation utilities (`barycentric_weights`,
+  `lagrange_eval`). Note that the time-discrete loss currently approximates ∂ₜû by
+  finite differences and does not yet use them for polynomial reconstruction.
 - Boundary conditioning via multiplicative factor Φ(x) = x(1-x)
 - Optional H¹ seminorm initial condition penalty
 - Complete example: 1D heat equation with manufactured solution
@@ -86,6 +67,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - MIT License
 - Detailed README with installation and usage instructions
 - ROADMAP for future development
+- `dtype` parameter on `MLP`, so the network's precision is explicit rather than
+  inherited from the global `torch.set_default_dtype` state
+- `pinn_rk.examples` as a regular package, making
+  `from pinn_rk.examples import train_heat_equation, l2_error` valid
+- Validation of `init_data`: `x0` must be a `[N,1]` tensor sorted in strictly
+  increasing order, which the initial-condition penalty relies on
+- `.zenodo.json` for archival metadata, and `.gitignore`
+
+### Changed
+
+- Default branch renamed from `develop` to `main`, which is what the CI and
+  release workflows were already configured to trigger on.
 
 ### Documentation
 

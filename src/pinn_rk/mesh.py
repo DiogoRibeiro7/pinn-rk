@@ -11,6 +11,7 @@ class TimeMesh:
     """
     Time partition 0 = t0 < ... < tN = T and step sizes k_n.
     """
+
     nodes: Tensor  # [N+1]
     steps: Tensor  # [N]
 

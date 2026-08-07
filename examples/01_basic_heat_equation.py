@@ -51,19 +51,17 @@ def make_initial_data(n_points: int, device: torch.device) -> tuple[Tensor, Tens
     return x0, u0
 
 
-def compute_l2_error(
-    model: nn.Module, T: float, n_points: int, device: torch.device
-) -> float:
+def compute_l2_error(model: nn.Module, T: float, n_points: int, device: torch.device) -> float:
     """Compute L2 error at final time."""
     x = torch.linspace(0, 1, n_points, device=device, dtype=torch.float64)
     x = x.unsqueeze(1)
     t = torch.full_like(x, T)
-    
+
     with torch.no_grad():
         u_pred = model(x, t)
         u_exact = exact_solution(x, t)
         error = torch.sqrt(torch.mean((u_pred - u_exact) ** 2))
-    
+
     return float(error.item())
 
 
@@ -79,18 +77,18 @@ def train_model(
     """Train the PINN model."""
     # Set default dtype
     torch.set_default_dtype(torch.float64)
-    
+
     # Setup RK method and time mesh
     tableau = butcher_radau_iia_q2(device)
     mesh = TimeMesh.uniform(T=T, N=N, device=device)
-    
+
     # Create model and operator
     model = MLP(in_dim=2, width=128, depth=4, activation="tanh").to(device)
     operator = Laplacian1D()
-    
+
     # Initial condition for H^1 penalty
     x0, u0 = make_initial_data(n_points=128, device=device)
-    
+
     # Configure loss
     config = RkPinnConfig(
         tableau=tableau,
@@ -100,36 +98,36 @@ def train_model(
         dtype=torch.float64,
         init_data=(x0, u0),
     )
-    
+
     loss_fn = RkPinnLoss(model=model, Lop=operator, f_rhs=source_term, cfg=config)
     loss_fn = loss_fn.to(device)
-    
+
     # Setup optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    
+
     # Training loop
     if verbose:
         print(f"Training on {device}...")
         print(f"Configuration: T={T}, N={N}, n_x_train={n_x_train}, steps={steps}")
         print("-" * 60)
-    
+
     for step in range(1, steps + 1):
         optimizer.zero_grad(set_to_none=True)
         loss = loss_fn()
-        
+
         if not torch.isfinite(loss):
             raise FloatingPointError(f"Non-finite loss at step {step}: {loss.item()}")
-        
+
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         optimizer.step()
-        
+
         if verbose and step % 100 == 0:
             print(f"Step {step:5d}: loss = {loss.item():.6e}")
-    
+
     if verbose:
         print("-" * 60)
-    
+
     return model
 
 
@@ -143,15 +141,15 @@ def main():
     parser.add_argument("--device", type=str, default="auto", help="Device (cpu/cuda/auto)")
     parser.add_argument("--save-model", type=str, default=None, help="Path to save model")
     parser.add_argument("--quiet", action="store_true", help="Suppress output")
-    
+
     args = parser.parse_args()
-    
+
     # Setup device
     if args.device == "auto":
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     else:
         device = torch.device(args.device)
-    
+
     # Train model
     model = train_model(
         T=args.T,
@@ -162,14 +160,14 @@ def main():
         device=device,
         verbose=not args.quiet,
     )
-    
+
     # Evaluate
     error = compute_l2_error(model, T=args.T, n_points=1001, device=device)
-    
+
     if not args.quiet:
         print("\nResults:")
         print(f"L2 error at T={args.T}: {error:.3e}")
-        
+
         # Classification of result quality
         if error < 0.01:
             quality = "Excellent"
@@ -180,13 +178,13 @@ def main():
         else:
             quality = "Poor (consider more training steps)"
         print(f"Quality: {quality}")
-    
+
     # Save model if requested
     if args.save_model:
         torch.save(model.state_dict(), args.save_model)
         if not args.quiet:
             print(f"\nModel saved to: {args.save_model}")
-    
+
     return model, error
 
 

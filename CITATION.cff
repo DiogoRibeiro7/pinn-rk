@@ -3,7 +3,7 @@ message: "If you use this software, please cite it as below."
 type: software
 title: "pinn-rk: Runge-Kutta Physics-Informed Neural Networks"
 version: 0.1.0
-date-released: 2025-01-15
+date-released: 2026-08-07
 authors:
   - family-names: "Ribeiro"
     given-names: "Diogo"

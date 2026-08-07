@@ -23,16 +23,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Poetry must be installed before setup-python, because cache: "poetry"
+      # resolves the dependency path by invoking poetry.
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "1.8.3"
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "poetry"
-
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: "1.8.3"
 
       - name: Configure Poetry
         run: |

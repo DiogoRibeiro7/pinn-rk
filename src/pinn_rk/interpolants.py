@@ -16,8 +16,9 @@ def barycentric_weights(nodes: Tensor) -> Tensor:
     for j in range(q):
         for m in range(q):
             if m != j:
-                w[j] /= (nodes[j] - nodes[m])
+                w[j] /= nodes[j] - nodes[m]
     return w
+
 
 def lagrange_eval(t: Tensor, nodes: Tensor, w: Tensor) -> Tensor:
     """
