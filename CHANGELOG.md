@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Nothing yet
+
+## [0.2.0] - 2026-08-07
+
+Wires the polynomial time reconstruction into the residual, so the loss now
+computes what the documented formulation always described. Users upgrading from
+0.1.0 should expect different loss values and different trained weights: the
+residual is measured against the interpolant û rather than against a finite
+difference of the network.
+
 ### Added
 
 - `differentiation_matrix(nodes, w=None)` in `pinn_rk.interpolants`, exported from
@@ -220,4 +230,5 @@ When making changes:
 --------------------------------------------------------------------------------
 
 [0.1.0]: https://github.com/DiogoRibeiro7/pinn-rk/releases/tag/v0.1.0
-[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.1.0...HEAD
+[0.2.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.1.0...v0.2.0
+[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.2.0...HEAD

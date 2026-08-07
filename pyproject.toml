@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pinn-rk"
-version = "0.1.0"
+version = "0.2.0"
 description = "Runge–Kutta Physics-Informed Neural Networks with time-discrete losses (Gauss/Radau/Lobatto) in PyTorch."
 authors = ["Diogo Ribeiro <dfr@esmad.ipp.pt>"]
 license = "MIT"

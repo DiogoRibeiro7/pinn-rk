@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "pinn-rk: Runge-Kutta Physics-Informed Neural Networks"
-version: 0.1.0
+version: 0.2.0
 date-released: 2026-08-07
 authors:
   - family-names: "Ribeiro"
@@ -39,6 +39,6 @@ preferred-citation:
       affiliation: "ESMAD - School of Media Arts and Design, Polytechnic of Porto"
       orcid: "https://orcid.org/0009-0001-2022-7072"
   year: 2025
-  version: 0.1.0
+  version: 0.2.0
   repository-code: "https://github.com/DiogoRibeiro7/pinn-rk"
   license: MIT
