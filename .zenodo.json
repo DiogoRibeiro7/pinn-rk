@@ -29,13 +29,13 @@
   ],
   "related_identifiers": [
     {
-      "identifier": "https://github.com/DiogoRibeiro7/rk-pinns",
+      "identifier": "https://github.com/DiogoRibeiro7/pinn-rk",
       "relation": "isSupplementTo",
       "scheme": "url",
       "resource_type": "software"
     },
     {
-      "identifier": "https://diogoribeiro7.github.io/rk-pinns",
+      "identifier": "https://diogoribeiro7.github.io/pinn-rk",
       "relation": "isDocumentedBy",
       "scheme": "url",
       "resource_type": "publication-softwaredocumentation"

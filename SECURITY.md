@@ -181,7 +181,7 @@ We appreciate responsible disclosure and will credit security researchers who re
 
 ## Updates to This Policy
 
-This security policy may be updated from time to time. Check the [repository](https://github.com/DiogoRibeiro7/rk-pinns) for the latest version.
+This security policy may be updated from time to time. Check the [repository](https://github.com/DiogoRibeiro7/pinn-rk) for the latest version.
 
 ---
 

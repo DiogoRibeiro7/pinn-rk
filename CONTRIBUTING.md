@@ -6,7 +6,7 @@ Thank you for your interest in contributing to pinn-rk! We welcome contributions
 
 ```bash
 # Clone the repository
-git clone https://github.com/DiogoRibeiro7/rk-pinns.git
+git clone https://github.com/DiogoRibeiro7/pinn-rk.git
 cd pinn-rk
 
 # Install Poetry if you haven't already

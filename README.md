@@ -1,13 +1,13 @@
 # pinn-rk
 
 <p align="center">
-  <a href="https://github.com/DiogoRibeiro7/rk-pinns/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/DiogoRibeiro7/rk-pinns/actions/workflows/ci.yml/badge.svg?branch=main"></a>
-  <a href="https://codecov.io/gh/DiogoRibeiro7/rk-pinns"><img alt="Coverage" src="https://codecov.io/gh/DiogoRibeiro7/rk-pinns/branch/main/graph/badge.svg"></a>
+  <a href="https://github.com/DiogoRibeiro7/pinn-rk/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/DiogoRibeiro7/pinn-rk/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://codecov.io/gh/DiogoRibeiro7/pinn-rk"><img alt="Coverage" src="https://codecov.io/gh/DiogoRibeiro7/pinn-rk/branch/main/graph/badge.svg"></a>
   <a href="https://pypi.org/project/pinn-rk/"><img alt="PyPI" src="https://img.shields.io/pypi/v/pinn-rk"></a>
   <a href="https://pypi.org/project/pinn-rk/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/pinn-rk"></a>
-  <a href="https://github.com/DiogoRibeiro7/rk-pinns/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+  <a href="https://github.com/DiogoRibeiro7/pinn-rk/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
   <a href="https://github.com/psf/black"><img alt="Code style: ruff" src="https://img.shields.io/badge/code%20style-ruff-000000.svg"></a>
-  <a href="https://github.com/DiogoRibeiro7/rk-pinns"><img alt="Downloads" src="https://img.shields.io/pypi/dm/pinn-rk"></a>
+  <a href="https://github.com/DiogoRibeiro7/pinn-rk"><img alt="Downloads" src="https://img.shields.io/pypi/dm/pinn-rk"></a>
 </p>
 
 Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete losses** in PyTorch. Supports Gauss, Radau IIA, and Lobatto IIIA Runge–Kutta schemes via Butcher tableaux, with boundary-conditioned neural ansatz and an end‑to‑end example for the 1D heat equation.
@@ -201,7 +201,7 @@ If you use this software in your research, please cite it:
   author = {Ribeiro, Diogo},
   title = {pinn-rk: Runge-Kutta Physics-Informed Neural Networks},
   year = {2025},
-  url = {https://github.com/DiogoRibeiro7/rk-pinns},
+  url = {https://github.com/DiogoRibeiro7/pinn-rk},
   version = {0.1.0}
 }
 ```
@@ -236,7 +236,7 @@ This work builds upon research in Physics-Informed Neural Networks and time-step
 
 ## Support
 
-- 📖 [Documentation](https://github.com/DiogoRibeiro7/rk-pinns)
-- 🐛 [Issue Tracker](https://github.com/DiogoRibeiro7/rk-pinns/issues)
-- 💬 [Discussions](https://github.com/DiogoRibeiro7/rk-pinns/discussions)
+- 📖 [Documentation](https://github.com/DiogoRibeiro7/pinn-rk)
+- 🐛 [Issue Tracker](https://github.com/DiogoRibeiro7/pinn-rk/issues)
+- 💬 [Discussions](https://github.com/DiogoRibeiro7/pinn-rk/discussions)
 - 📧 Contact: [dfr@esmad.ipp.pt](mailto:dfr@esmad.ipp.pt)

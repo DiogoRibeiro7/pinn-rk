@@ -42,9 +42,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `MLP` built float32 layers while the loss fed float64 inputs, so constructing a
   model without first calling `torch.set_default_dtype(torch.float64)` failed with
   a dtype mismatch.
-- Repository, documentation, and badge URLs pointed at a repository name that does
-  not exist (`diogoribeiro7/pinn-rk` rather than `DiogoRibeiro7/rk-pinns`), so every
-  badge and link was broken.
+- Badge and documentation links pinned the `main` branch while the default branch
+  was `develop`, so the coverage badge and several file links resolved to nothing.
+  The CI badge also used the deprecated `/workflows/CI/badge.svg` endpoint.
 - README rendered raw LaTeX as literal text, and its package layout described a
   `rk_pinn.py` module that does not exist.
 
@@ -193,5 +193,5 @@ When making changes:
 
 --------------------------------------------------------------------------------
 
-[0.1.0]: https://github.com/DiogoRibeiro7/rk-pinns/releases/tag/v0.1.0
-[unreleased]: https://github.com/DiogoRibeiro7/rk-pinns/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/DiogoRibeiro7/pinn-rk/releases/tag/v0.1.0
+[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.1.0...HEAD

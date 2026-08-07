@@ -1,10 +1,10 @@
 site_name: pinn-rk Documentation
 site_description: Runge-Kutta Physics-Informed Neural Networks in PyTorch
 site_author: Diogo Ribeiro
-site_url: https://diogoribeiro7.github.io/rk-pinns
+site_url: https://diogoribeiro7.github.io/pinn-rk
 
-repo_url: https://github.com/DiogoRibeiro7/rk-pinns
-repo_name: DiogoRibeiro7/rk-pinns
+repo_url: https://github.com/DiogoRibeiro7/pinn-rk
+repo_name: DiogoRibeiro7/pinn-rk
 edit_uri: edit/main/docs/
 
 copyright: Copyright &copy; 2025 Diogo Ribeiro
@@ -166,7 +166,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/DiogoRibeiro7/rk-pinns
+      link: https://github.com/DiogoRibeiro7/pinn-rk
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/pinn-rk/
   analytics:
