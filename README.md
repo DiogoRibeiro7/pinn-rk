@@ -6,6 +6,7 @@
   <a href="https://pypi.org/project/pinn-rk/"><img alt="PyPI" src="https://img.shields.io/pypi/v/pinn-rk"></a>
   <a href="https://pypi.org/project/pinn-rk/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/pinn-rk"></a>
   <a href="https://github.com/DiogoRibeiro7/pinn-rk/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+  <a href="https://doi.org/10.5281/zenodo.21839391"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.21839391.svg"></a>
   <a href="https://github.com/psf/black"><img alt="Code style: ruff" src="https://img.shields.io/badge/code%20style-ruff-000000.svg"></a>
   <a href="https://github.com/DiogoRibeiro7/pinn-rk"><img alt="Downloads" src="https://img.shields.io/pypi/dm/pinn-rk"></a>
 </p>
@@ -222,14 +223,18 @@ Key points:
 If you use this software in your research, please cite it:
 
 ```bibtex
-@software{ribeiro2025pinnrk,
-  author = {Ribeiro, Diogo},
-  title = {pinn-rk: Runge-Kutta Physics-Informed Neural Networks},
-  year = {2025},
-  url = {https://github.com/DiogoRibeiro7/pinn-rk},
-  version = {0.1.0}
+@software{ribeiro_pinn_rk,
+  author    = {Ribeiro, Diogo},
+  title     = {pinn-rk: Runge-Kutta Physics-Informed Neural Networks},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.21839391},
+  url       = {https://doi.org/10.5281/zenodo.21839391},
+  version   = {0.2.0}
 }
 ```
+
+The DOI above is the **concept DOI**: it always resolves to the latest version. To cite a specific release, use its own DOI instead — `10.5281/zenodo.21843920` for v0.2.0, `10.5281/zenodo.21839392` for v0.1.0.
 
 Or see [CITATION.cff](./CITATION.cff) for the full citation information.
 

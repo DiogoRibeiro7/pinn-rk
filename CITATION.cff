@@ -10,6 +10,17 @@ authors:
     email: "dfr@esmad.ipp.pt"
     affiliation: "ESMAD - School of Media Arts and Design, Polytechnic of Porto"
     orcid: "https://orcid.org/0009-0001-2022-7072"
+doi: "10.5281/zenodo.21839391"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.21839391"
+    description: "Concept DOI, always resolving to the latest version"
+  - type: doi
+    value: "10.5281/zenodo.21843920"
+    description: "Archived snapshot of version 0.2.0"
+  - type: doi
+    value: "10.5281/zenodo.21839392"
+    description: "Archived snapshot of version 0.1.0"
 repository-code: "https://github.com/DiogoRibeiro7/pinn-rk"
 url: "https://github.com/DiogoRibeiro7/pinn-rk"
 abstract: >-
@@ -38,7 +49,8 @@ preferred-citation:
       email: "dfr@esmad.ipp.pt"
       affiliation: "ESMAD - School of Media Arts and Design, Polytechnic of Porto"
       orcid: "https://orcid.org/0009-0001-2022-7072"
-  year: 2025
+  year: 2026
   version: 0.2.0
+  doi: "10.5281/zenodo.21839391"
   repository-code: "https://github.com/DiogoRibeiro7/pinn-rk"
   license: MIT

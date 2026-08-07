@@ -6,7 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-- Nothing yet
+### Added
+
+- Zenodo DOIs, now that the archive exists. The README badge and BibTeX entry, and
+  `CITATION.cff`, carry the concept DOI `10.5281/zenodo.21839391`, which always
+  resolves to the latest version; the per-version DOIs are recorded alongside it.
 
 ## [0.2.0] - 2026-08-07
 
