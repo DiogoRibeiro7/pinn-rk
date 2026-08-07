@@ -2,7 +2,7 @@
 
 **Runge-Kutta Physics-Informed Neural Networks in PyTorch**
 
-!!! info "Latest Version" Current version: **0.1.0** | [Release Notes](changelog.md) | [GitHub](https://github.com/diogoribeiro7/pinn-rk)
+!!! info "Latest Version" Current version: **0.1.0** | [Release Notes](changelog.md) | [GitHub](https://github.com/DiogoRibeiro7/rk-pinns)
 
 ## What is pinn-rk?
 
@@ -74,7 +74,7 @@ Traditional PINNs evaluate the PDE residual continuously in time, which can lead
 ### Using Poetry (Recommended)
 
 ```bash
-git clone https://github.com/diogoribeiro7/pinn-rk.git
+git clone https://github.com/DiogoRibeiro7/rk-pinns.git
 cd pinn-rk
 poetry install
 ```
@@ -269,9 +269,9 @@ _Tested on NVIDIA RTX 4090_
 
 ## Community
 
-- :fontawesome-brands-github: [GitHub Repository](https://github.com/diogoribeiro7/pinn-rk)
-- :material-bug: [Issue Tracker](https://github.com/diogoribeiro7/pinn-rk/issues)
-- :material-forum: [Discussions](https://github.com/diogoribeiro7/pinn-rk/discussions)
+- :fontawesome-brands-github: [GitHub Repository](https://github.com/DiogoRibeiro7/rk-pinns)
+- :material-bug: [Issue Tracker](https://github.com/DiogoRibeiro7/rk-pinns/issues)
+- :material-forum: [Discussions](https://github.com/DiogoRibeiro7/rk-pinns/discussions)
 - :material-book: [Contributing Guide](contributing.md)
 
 --------------------------------------------------------------------------------
@@ -285,7 +285,7 @@ If you use pinn-rk in your research, please cite:
   author = {Ribeiro, Diogo},
   title = {pinn-rk: Runge-Kutta Physics-Informed Neural Networks},
   year = {2025},
-  url = {https://github.com/diogoribeiro7/pinn-rk},
+  url = {https://github.com/DiogoRibeiro7/rk-pinns},
   version = {0.1.0}
 }
 ```
@@ -294,7 +294,7 @@ If you use pinn-rk in your research, please cite:
 
 ## License
 
-pinn-rk is released under the [MIT License](https://github.com/diogoribeiro7/pinn-rk/blob/main/LICENSE).
+pinn-rk is released under the [MIT License](https://github.com/DiogoRibeiro7/rk-pinns/blob/main/LICENSE).
 
 --------------------------------------------------------------------------------
 
@@ -357,6 +357,6 @@ See [ROADMAP.md](roadmap.md) for detailed plans.
 ```
 - Check the [FAQ](getting-started/faq.md)
 - Browse [Examples](examples/overview.md)
-- Ask in [Discussions](https://github.com/diogoribeiro7/pinn-rk/discussions)
-- Report bugs in [Issues](https://github.com/diogoribeiro7/pinn-rk/issues)
+- Ask in [Discussions](https://github.com/DiogoRibeiro7/rk-pinns/discussions)
+- Report bugs in [Issues](https://github.com/DiogoRibeiro7/rk-pinns/issues)
 ```

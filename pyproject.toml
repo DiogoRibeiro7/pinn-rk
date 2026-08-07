@@ -5,9 +5,9 @@ description = "Runge–Kutta Physics-Informed Neural Networks with time-discrete
 authors = ["Diogo Ribeiro <dfr@esmad.ipp.pt>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/diogoribeiro7/pinn-rk"
-repository = "https://github.com/diogoribeiro7/pinn-rk"
-documentation = "https://diogoribeiro7.github.io/pinn-rk"
+homepage = "https://github.com/DiogoRibeiro7/rk-pinns"
+repository = "https://github.com/DiogoRibeiro7/rk-pinns"
+documentation = "https://diogoribeiro7.github.io/rk-pinns"
 packages = [{ include = "pinn_rk", from = "src" }]
 keywords = ["pinn", "runge-kutta", "scientific-ml", "numerical-pde", "torch", "parabolic-pde", "physics-informed-neural-networks"]
 classifiers = [
@@ -22,9 +22,9 @@ classifiers = [
 ]
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/diogoribeiro7/pinn-rk/issues"
-"Discussions" = "https://github.com/diogoribeiro7/pinn-rk/discussions"
-"Changelog" = "https://github.com/diogoribeiro7/pinn-rk/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/DiogoRibeiro7/rk-pinns/issues"
+"Discussions" = "https://github.com/DiogoRibeiro7/rk-pinns/discussions"
+"Changelog" = "https://github.com/DiogoRibeiro7/rk-pinns/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"

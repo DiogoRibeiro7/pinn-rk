@@ -1,13 +1,13 @@
 # pinn-rk
 
 <p align="center">
-  <a href="https://github.com/diogoribeiro7/pinn-rk/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/diogoribeiro7/pinn-rk/workflows/CI/badge.svg"></a>
-  <a href="https://codecov.io/gh/diogoribeiro7/pinn-rk"><img alt="Coverage" src="https://codecov.io/gh/diogoribeiro7/pinn-rk/branch/main/graph/badge.svg"></a>
+  <a href="https://github.com/DiogoRibeiro7/rk-pinns/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/DiogoRibeiro7/rk-pinns/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://codecov.io/gh/DiogoRibeiro7/rk-pinns"><img alt="Coverage" src="https://codecov.io/gh/DiogoRibeiro7/rk-pinns/branch/main/graph/badge.svg"></a>
   <a href="https://pypi.org/project/pinn-rk/"><img alt="PyPI" src="https://img.shields.io/pypi/v/pinn-rk"></a>
   <a href="https://pypi.org/project/pinn-rk/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/pinn-rk"></a>
-  <a href="https://github.com/diogoribeiro7/pinn-rk/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+  <a href="https://github.com/DiogoRibeiro7/rk-pinns/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
   <a href="https://github.com/psf/black"><img alt="Code style: ruff" src="https://img.shields.io/badge/code%20style-ruff-000000.svg"></a>
-  <a href="https://github.com/diogoribeiro7/pinn-rk"><img alt="Downloads" src="https://img.shields.io/pypi/dm/pinn-rk"></a>
+  <a href="https://github.com/DiogoRibeiro7/rk-pinns"><img alt="Downloads" src="https://img.shields.io/pypi/dm/pinn-rk"></a>
 </p>
 
 Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete losses** in PyTorch. Supports Gauss, Radau IIA, and Lobatto IIIA Runge–Kutta schemes via Butcher tableaux, with boundary-conditioned neural ansatz and an end‑to‑end example for the 1D heat equation.
@@ -20,7 +20,7 @@ Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete 
 
 * **Time‑discrete residual** built from Runge–Kutta collocation: residuals evaluated at stage nodes and integrated with RK weights.
 * **General RK backend** via `ButcherTableau` (Gauss/Radau/Lobatto included; easily extensible).
-* **Boundary conditioning** through a multiplicative factor (Φ(x)) to satisfy homogeneous Dirichlet BCs exactly.
+* **Boundary conditioning** through a multiplicative factor $\Phi(x)$ to satisfy homogeneous Dirichlet BCs exactly.
 * **Modular PDE operators** (e.g., `Laplacian1D`) with autograd‑based derivatives.
 * **Practical implementation**: type hints, ruff/mypy clean, tests, and GitHub Actions CI.
 
@@ -40,7 +40,7 @@ pre-commit install
 
 ## Quick start
 
-Train on the 1D heat equation (u_t - u_{xx} = 0) on ((0,1)) with homogeneous Dirichlet BCs and initial condition (u_0(x) = \sin(\pi x)):
+Train on the 1D heat equation $u_t - u_{xx} = 0$ on $(0,1)$ with homogeneous Dirichlet BCs and initial condition $u_0(x) = \sin(\pi x)$:
 
 ```python
 from pinn_rk.examples.train_heat_equation import train_heat_equation, l2_error
@@ -67,13 +67,17 @@ Expected output (ballpark): `L2(T=0.1) ~ 1e-2 … 1e-1` depending on training st
 
 We consider linear parabolic PDEs of the form
 
-[ u_t + \mathcal{L} u = f \quad \text{in } \Omega\times(0,T], \qquad u=0 \text{ on } \partial\Omega, \qquad u(\cdot,0)=u_0. ]
+$$
+u_t + \mathcal{L}u = f \quad \text{in } \Omega \times (0,T], \qquad u = 0 \text{ on } \partial\Omega, \qquad u(\cdot, 0) = u_0 .
+$$
 
-The time interval is partitioned into slabs (J_n=[t_n,t_{n+1}]) with step (k_n). For a (q)-stage RK method with nodes (c_i), we form **stage times** (t_{n,i}=t_n + c_i k_n) and evaluate the network (u_\theta(x,t)) and operator (\mathcal{L} u_\theta) at these times. The **discrete RK residual** is accumulated using the quadrature weights (b_i):
+The time interval is partitioned into slabs $J_n = [t_n, t_{n+1}]$ with step $k_n$. For a $q$-stage RK method with nodes $c_i$, we form **stage times** $t_{n,i} = t_n + c_i k_n$ and evaluate the network $u_\theta(x,t)$ and the operator $\mathcal{L}u_\theta$ at these times. The **discrete RK residual** is accumulated using the quadrature weights $b_i$:
 
-[ \int_{J_n} | r(t) |^2 dt ;\approx; k_n \sum_{i=1}^q b_i, | r(t_{n,i}) |^2,\quad r := \partial_t \hat u + \Pi_{q-1}(\mathcal{L}\hat u) - \tilde\Pi_{q-1} f. ]
+$$
+\int_{J_n} \lVert r(t) \rVert^2 \, dt \;\approx\; k_n \sum_{i=1}^{q} b_i \, \lVert r(t_{n,i}) \rVert^2 , \qquad r := \partial_t \hat{u} + \Pi_{q-1}(\mathcal{L}\hat{u}) - \tilde{\Pi}_{q-1} f .
+$$
 
-Here, (\hat u) is a polynomial time interpolant on each slab and (\Pi_{q-1}, \tilde\Pi_{q-1}) are degree (q-1) projections realized at collocation nodes.
+Here $\hat{u}$ is a polynomial time interpolant on each slab, and $\Pi_{q-1}$, $\tilde{\Pi}_{q-1}$ are degree $q-1$ projections realized at the collocation nodes.
 
 ---
 
@@ -81,8 +85,14 @@ Here, (\hat u) is a polynomial time interpolant on each slab and (\Pi_{q-1}, \ti
 
 ```plaintext
 src/pinn_rk/
-├─ rk_pinn.py       # core loss, RK tableaux, model, training utilities
+├─ tableau.py       # ButcherTableau + Gauss/Radau/Lobatto factories
+├─ mesh.py          # TimeMesh: partition of [0,T] into slabs
+├─ interpolants.py  # barycentric weights, Lagrange evaluation
+├─ model.py         # MLP with boundary-conditioned ansatz
 ├─ operators.py     # elliptic operators (e.g., Laplacian1D)
+├─ config.py        # RkPinnConfig
+├─ loss.py          # RkPinnLoss: the time-discrete RK objective
+├─ examples/        # reference training routines (heat equation)
 ├─ __init__.py      # public API
 └─ __about__.py     # version
 ```
@@ -104,15 +114,15 @@ src/pinn_rk/
 
 ### `TimeMesh`
 
-**Purpose.** Uniform or user‑defined partition of ([0,T]).
+**Purpose.** Uniform or user‑defined partition of $[0,T]$.
 
 * `TimeMesh.uniform(T: float, N: int, device) -> TimeMesh`
 * Fields: `nodes: Tensor [N+1]`, `steps: Tensor [N]`.
 
 ### `MLP`
 
-**Purpose.** Network (g_\theta(x,t)) used inside the boundary‑conditioned ansatz
-(u_\theta(x,t) = \Phi(x), g_\theta(x,t)) with (\Phi(x)=x(1-x)).
+**Purpose.** Network $g_\theta(x,t)$ used inside the boundary‑conditioned ansatz
+$u_\theta(x,t) = \Phi(x) \, g_\theta(x,t)$ with $\Phi(x) = x(1-x)$.
 
 * `MLP(in_dim=2, width=128, depth=4, activation="tanh")`
 
@@ -132,7 +142,7 @@ src/pinn_rk/
 ### Utilities
 
 * `train_heat_equation(...) -> nn.Module` – reference training routine.
-* `l2_error(model, T, nx=1001, device) -> float` – (L^2) error at final time.
+* `l2_error(model, T, nx=1001, device) -> float` – $L^2$ error at final time.
 
 ---
 
@@ -150,7 +160,7 @@ Switch via the `method` argument in `train_heat_equation`.
 
 1. **Add RK variants.** Implement additional `ButcherTableau` factories (e.g., Gauss q=3, Radau IIA q=3). No other code changes required.
 2. **New PDE operators.** Create a class implementing the `EllipticOperator` protocol and supply it to `RkPinnLoss`.
-3. **Initial/boundary data.** Replace `init_data` and/or change the boundary factor (\Phi) for different domains/BCs.
+3. **Initial/boundary data.** Replace `init_data` and/or change the boundary factor $\Phi$ for different domains/BCs.
 4. **Right‑hand side.** Provide a custom `f_rhs(x,t)` callable.
 
 ---
@@ -165,7 +175,7 @@ Switch via the `method` argument in `train_heat_equation`.
 
 ## Benchmarks (indicative)
 
-Training the heat‑equation example for ~1k–5k steps typically reaches (L^2) errors between `1e-2` and `1e-1` at `T=0.1`, depending on the RK scheme and batch sizes. Use `radau2` for stability and increase `N` and training `steps` for tighter accuracy.
+Training the heat‑equation example for ~1k–5k steps typically reaches $L^2$ errors between `1e-2` and `1e-1` at `T=0.1`, depending on the RK scheme and batch sizes. Use `radau2` for stability and increase `N` and training `steps` for tighter accuracy.
 
 ---
 
@@ -191,7 +201,7 @@ If you use this software in your research, please cite it:
   author = {Ribeiro, Diogo},
   title = {pinn-rk: Runge-Kutta Physics-Informed Neural Networks},
   year = {2025},
-  url = {https://github.com/diogoribeiro7/pinn-rk},
+  url = {https://github.com/DiogoRibeiro7/rk-pinns},
   version = {0.1.0}
 }
 ```
@@ -226,7 +236,7 @@ This work builds upon research in Physics-Informed Neural Networks and time-step
 
 ## Support
 
-- 📖 [Documentation](https://github.com/diogoribeiro7/pinn-rk)
-- 🐛 [Issue Tracker](https://github.com/diogoribeiro7/pinn-rk/issues)
-- 💬 [Discussions](https://github.com/diogoribeiro7/pinn-rk/discussions)
+- 📖 [Documentation](https://github.com/DiogoRibeiro7/rk-pinns)
+- 🐛 [Issue Tracker](https://github.com/DiogoRibeiro7/rk-pinns/issues)
+- 💬 [Discussions](https://github.com/DiogoRibeiro7/rk-pinns/discussions)
 - 📧 Contact: [dfr@esmad.ipp.pt](mailto:dfr@esmad.ipp.pt)

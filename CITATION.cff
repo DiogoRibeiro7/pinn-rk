@@ -8,10 +8,10 @@ authors:
   - family-names: "Ribeiro"
     given-names: "Diogo"
     email: "dfr@esmad.ipp.pt"
-    affiliation: "ESMAD - Polytechnic Institute of Porto"
+    affiliation: "ESMAD - School of Media Arts and Design, Polytechnic of Porto"
     orcid: "https://orcid.org/0009-0001-2022-7072"
-repository-code: "https://github.com/diogoribeiro7/pinn-rk"
-url: "https://github.com/diogoribeiro7/pinn-rk"
+repository-code: "https://github.com/DiogoRibeiro7/rk-pinns"
+url: "https://github.com/DiogoRibeiro7/rk-pinns"
 abstract: >-
   A PyTorch library for solving time-dependent partial differential equations
   using Runge-Kutta Physics-Informed Neural Networks (RK-PINNs). The library
@@ -36,7 +36,9 @@ preferred-citation:
     - family-names: "Ribeiro"
       given-names: "Diogo"
       email: "dfr@esmad.ipp.pt"
+      affiliation: "ESMAD - School of Media Arts and Design, Polytechnic of Porto"
+      orcid: "https://orcid.org/0009-0001-2022-7072"
   year: 2025
   version: 0.1.0
-  repository-code: "https://github.com/diogoribeiro7/pinn-rk"
+  repository-code: "https://github.com/DiogoRibeiro7/rk-pinns"
   license: MIT
