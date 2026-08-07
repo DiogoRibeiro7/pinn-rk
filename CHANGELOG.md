@@ -8,11 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- Nothing yet
+- `dtype` parameter on `MLP`, so the network's precision is explicit instead of
+  inherited from the global `torch.set_default_dtype` state
+- `pinn_rk.examples` is now a regular package, making
+  `from pinn_rk.examples import train_heat_equation, l2_error` valid
+- Validation of `init_data`: `x0` must be a `[N,1]` tensor sorted in strictly
+  increasing order, which the initial-condition penalty relies on
+- `.zenodo.json` for archival metadata on release
+- `.gitignore`
 
 ### Changed
 
-- Nothing yet
+- Renamed the default branch from `develop` to `main`. This also activates the CI
+  and release workflows, which were already configured to trigger on `main` and so
+  had never run.
 
 ### Deprecated
 
@@ -24,7 +33,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- Nothing yet
+- `RkPinnLoss.forward` raised `RuntimeError` on every call: the interpolant
+  `torch.einsum` used `1` as a subscript, which is not a valid subscript label.
+  The core loss could not be evaluated at all.
+- The H¹ initial-condition penalty called `torch.autograd.grad` on `u0`, which is
+  supplied as sampled values and carries no autograd history. The target
+  derivative ∂ₓu₀ is now computed numerically on the `x0` grid.
+- `MLP` built float32 layers while the loss fed float64 inputs, so constructing a
+  model without first calling `torch.set_default_dtype(torch.float64)` failed with
+  a dtype mismatch.
+- Repository, documentation, and badge URLs pointed at a repository name that does
+  not exist (`diogoribeiro7/pinn-rk` rather than `DiogoRibeiro7/rk-pinns`), so every
+  badge and link was broken.
+- README rendered raw LaTeX as literal text, and its package layout described a
+  `rk_pinn.py` module that does not exist.
 
 ### Security
 
@@ -109,7 +131,7 @@ This is the first public release of **pinn-rk**, a PyTorch library for solving t
 **Example Use Case:**
 
 ```python
-from pinn_rk import train_heat_equation, l2_error
+from pinn_rk.examples import train_heat_equation, l2_error
 
 model = train_heat_equation(
     method="radau2",
@@ -171,5 +193,5 @@ When making changes:
 
 --------------------------------------------------------------------------------
 
-[0.1.0]: https://github.com/diogoribeiro7/pinn-rk/releases/tag/v0.1.0
-[unreleased]: https://github.com/diogoribeiro7/pinn-rk/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/DiogoRibeiro7/rk-pinns/releases/tag/v0.1.0
+[unreleased]: https://github.com/DiogoRibeiro7/rk-pinns/compare/v0.1.0...HEAD
