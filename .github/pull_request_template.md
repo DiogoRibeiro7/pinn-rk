@@ -158,7 +158,7 @@ poetry run pytest --cov=pinn_rk
 - [ ] Code has been reviewed and approved
 - [ ] All review comments addressed
 - [ ] Changelog updated
-- [ ] Branch is up to date with main/develop
+- [ ] Branch is up to date with main
 - [ ] Commits are squashed/cleaned up (if requested)
 
 # Post-Merge Actions 
