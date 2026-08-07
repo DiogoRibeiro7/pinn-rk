@@ -15,14 +15,14 @@ from .tableau import butcher_lobatto_iiia_q2 as butcher_lobatto_iiia_q2
 from .tableau import butcher_radau_iia_q2 as butcher_radau_iia_q2
 
 __all__ = [
-    "__version__",
+    "MLP",
     "ButcherTableau",
     "EllipticOperator",
     "Laplacian1D",
-    "MLP",
     "RkPinnConfig",
     "RkPinnLoss",
     "TimeMesh",
+    "__version__",
     "barycentric_weights",
     "butcher_gauss_legendre_q2",
     "butcher_lobatto_iiia_q2",

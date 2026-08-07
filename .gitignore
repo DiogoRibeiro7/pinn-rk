@@ -1,0 +1,45 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing and coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+junit.xml
+.pytest_cache/
+.benchmarks/
+
+# Type checking, linting, security
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+bandit-report.json
+mypy-report.xml
+
+# Documentation build
+site/
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Trained model checkpoints produced by the examples
+*.pt
+*.pth
