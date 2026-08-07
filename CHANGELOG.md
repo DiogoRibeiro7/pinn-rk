@@ -6,7 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-- Nothing yet
+### Added
+
+- `differentiation_matrix(nodes, w=None)` in `pinn_rk.interpolants`, exported from
+  the package root. Returns `D[i, j] = L_j'(t_i)` from the barycentric weights,
+  exact for polynomials of degree ≤ q-1.
+- `RkPinnConfig.q_aux` is now honoured rather than ignored. `"same"` reconstructs
+  û through the q stage values (degree q-1); `"extend"` also uses the slab start
+  t_n (degree q, one extra network evaluation per slab). Tableaux whose first
+  stage already sits at t_n, such as Lobatto IIIA with c_1 = 0, are left
+  unextended, since a duplicated node makes the barycentric weights infinite.
+- `tests/test_time_reconstruction.py`, which measures the residual's consistency
+  error against the manufactured solution and pins the observed convergence
+  orders, so a regression shows up as a failing order rather than a slightly
+  worse loss.
+
+### Changed
+
+- ∂ₜû at the stage nodes is now taken analytically from the polynomial time
+  reconstruction instead of by symmetric finite differences of the network. This
+  is what the README's formulation always described: the residual is measured
+  against the interpolant û, not against the raw network.
+- The barycentric interpolation utilities are now actually used by the loss. They
+  previously backed only a dead expression whose result was discarded.
+- `RkPinnConfig.q_aux` now defaults to `"extend"` rather than `"same"`. Measured
+  on the manufactured solution, the residual's consistency error is O(k) for
+  `"same"` and O(k²) for `"extend"` — at the slab size used by the shipped
+  example, 1.6e-1 against 2.6e-3. The previous value was never actually read, so
+  no existing behaviour changes.
+
+### Removed
+
+- The finite-difference time-derivative path, along with the `eps = 1e-6 * k_n`
+  step size it depended on. It cost 2q network evaluations per slab and made the
+  residual sensitive to the choice of eps.
 
 ## [0.1.0] - 2026-08-07
 

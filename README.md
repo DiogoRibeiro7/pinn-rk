@@ -79,6 +79,21 @@ $$
 
 Here $\hat{u}$ is a polynomial time interpolant on each slab, and $\Pi_{q-1}$, $\tilde{\Pi}_{q-1}$ are degree $q-1$ projections realized at the collocation nodes.
 
+$\partial_t\hat{u}$ is obtained **analytically**, by applying the barycentric differentiation matrix $D_{ij} = L_j'(t_i)$ to the stage values — the network is never differentiated in $t$ by finite differences.
+
+### Consistency of the time reconstruction
+
+Because $\hat{u}$ is a polynomial approximation in time, the residual carries a truncation error: it does **not** vanish on the exact solution. Since training minimises the residual, that error sets a floor on attainable accuracy. Feeding the manufactured solution $u = \sin(\pi x)e^{-\pi^2 t}$ through the residual isolates it:
+
+| stencil (`q_aux`) | $\deg\hat{u}$ | max residual at $k=5\times10^{-3}$ | observed order |
+| --- | --- | --- | --- |
+| `"same"` — stage nodes only | $q-1$ | $1.6\times10^{-1}$ | $\mathcal{O}(k)$ |
+| `"extend"` — plus slab start | $q$ | $2.6\times10^{-3}$ | $\mathcal{O}(k^2)$ |
+
+`"extend"` is the default for this reason. Lobatto IIIA is the exception: its first node already sits at $t_n$ ($c_1 = 0$), so the stencil cannot be extended without duplicating a node, and it stays first order. Both orders are pinned by `tests/test_time_reconstruction.py`.
+
+> **Known limitation.** The residual currently uses only the RK nodes $c$ and quadrature weights $b$. The Butcher coupling matrix $A$ is validated but not yet used, so accuracy is governed by the degree of $\hat{u}$ rather than by the classical order of the tableau (3 for Radau IIA, 4 for Gauss). Raising $q$ is the lever that improves it today — see [ROADMAP.md](./ROADMAP.md).
+
 ---
 
 ## Package layout
@@ -138,6 +153,16 @@ $u_\theta(x,t) = \Phi(x) \, g_\theta(x,t)$ with $\Phi(x) = x(1-x)$.
 
 * `RkPinnLoss(model, Lop, f_rhs, cfg)`
 * Call to compute scalar loss: `loss = loss_fn()`
+
+### Interpolants
+
+**Purpose.** Barycentric Lagrange machinery backing the time reconstruction $\hat{u}$.
+
+* `barycentric_weights(nodes) -> Tensor [q]`
+* `lagrange_eval(t, nodes, w) -> Tensor [..., q]` – basis values $L_j(t)$, for evaluating $\hat{u}$ away from the nodes.
+* `differentiation_matrix(nodes, w=None) -> Tensor [q,q]` – $D_{ij} = L_j'(t_i)$, exact for polynomials of degree $\le q-1$.
+
+$\partial_t\hat{u}$ at the stage nodes is `D @ U`, taken analytically from the interpolant. The reconstruction stencil is selected by `RkPinnConfig.q_aux`: `"same"` interpolates the $q$ stage values ($\hat{u}$ of degree $q-1$), `"extend"` also uses the slab start $t_n$ (degree $q$, one extra network evaluation per slab).
 
 ### Utilities
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 from .__about__ import __version__ as __version__
 from .config import RkPinnConfig as RkPinnConfig
 from .interpolants import barycentric_weights as barycentric_weights
+from .interpolants import differentiation_matrix as differentiation_matrix
 from .interpolants import lagrange_eval as lagrange_eval
 from .loss import RkPinnLoss as RkPinnLoss
 from .mesh import TimeMesh as TimeMesh
@@ -27,5 +28,6 @@ __all__ = [
     "butcher_gauss_legendre_q2",
     "butcher_lobatto_iiia_q2",
     "butcher_radau_iia_q2",
+    "differentiation_matrix",
     "lagrange_eval",
 ]

@@ -47,3 +47,43 @@ def lagrange_eval(t: Tensor, nodes: Tensor, w: Tensor) -> Tensor:
     num = w / diff  # [..., q]
     denom = num.sum(dim=-1, keepdim=True)
     return num / denom
+
+
+def differentiation_matrix(nodes: Tensor, w: Tensor | None = None) -> Tensor:
+    """
+    Build the barycentric differentiation matrix for the given interpolation nodes.
+
+    Returns ``D`` with ``D[i, j] = ℓ_j'(t_i)``, so that for values ``u`` sampled at
+    ``nodes``, ``D @ u`` is the derivative of the interpolating polynomial evaluated
+    at those same nodes. This is exact for polynomials of degree ≤ q-1.
+
+    Off-diagonal entries follow the standard barycentric identity
+    ``D[i, j] = (w_j / w_i) / (t_i - t_j)``; the diagonal is set by the negative
+    row sum, which enforces exactness on constants.
+
+    Parameters
+    ----------
+    nodes : Tensor [q], interpolation nodes, pairwise distinct
+    w : Tensor [q], optional precomputed barycentric weights
+
+    Returns
+    -------
+    Tensor [q, q] : differentiation matrix
+    """
+    if nodes.ndim != 1:
+        raise ValueError("nodes must be a 1D tensor.")
+    q = nodes.numel()
+    if q < 2:
+        raise ValueError("differentiation requires at least two nodes.")
+    if w is None:
+        w = barycentric_weights(nodes)
+    elif w.ndim != 1 or w.numel() != q:
+        raise ValueError("w must be 1D with the same length as nodes.")
+
+    diff = nodes.unsqueeze(1) - nodes.unsqueeze(0)  # [q,q], diff[i,j] = t_i - t_j
+    eye = torch.eye(q, dtype=torch.bool, device=nodes.device)
+    # Avoid dividing by the zero diagonal; those entries are overwritten below.
+    safe = torch.where(eye, torch.ones_like(diff), diff)
+    D = (w.unsqueeze(0) / w.unsqueeze(1)) / safe  # [i,j] = (w_j / w_i) / (t_i - t_j)
+    D = D.masked_fill(eye, 0.0)
+    return D + torch.diag_embed(-D.sum(dim=1))

@@ -7,7 +7,7 @@ import torch
 from torch import Tensor, nn
 
 from .config import RkPinnConfig
-from .interpolants import barycentric_weights, lagrange_eval
+from .interpolants import differentiation_matrix
 from .operators import EllipticOperator
 
 
@@ -67,6 +67,25 @@ class RkPinnLoss(nn.Module):
         t.requires_grad_(self.L.requires_hessian())
         return cast(Tensor, self.model(x, t))
 
+    def _interp_nodes(self, t_stage: Tensor, t_n: Tensor) -> tuple[Tensor, bool]:
+        """
+        Nodes carrying the polynomial time reconstruction on a slab.
+
+        With ``q_aux="same"`` the reconstruction interpolates the q stage values, so
+        û has degree q-1. With ``q_aux="extend"`` the slab start t_n joins them,
+        raising û to degree q at the cost of one extra network evaluation. Tableaux
+        whose first node already sits at t_n (Lobatto IIIA has c_1 = 0) would
+        duplicate a node and produce infinite barycentric weights, so for those the
+        stencil is left unextended.
+
+        Returns the nodes and whether t_n was prepended.
+        """
+        if self.cfg.q_aux == "extend" and not bool(
+            torch.isclose(t_stage, t_n, atol=1e-14, rtol=0.0).any()
+        ):
+            return torch.cat([t_n.reshape(1), t_stage]), True
+        return t_stage, False
+
     def forward(self) -> Tensor:
         device = self.cfg.device
         dtype = self.cfg.dtype
@@ -81,9 +100,8 @@ class RkPinnLoss(nn.Module):
             assert self.cfg.spatial_sampler is not None
             x = self.cfg.spatial_sampler(self.cfg.n_x_train, device)  # [B,1]
 
-            # Stage times and barycentric weights on J_n
+            # Stage times on J_n
             t_stage = self._stage_times(n)  # [q]
-            w_nodes = barycentric_weights(t_stage)
 
             # Evaluate at stage nodes
             u_stage: list[Tensor] = []
@@ -101,22 +119,23 @@ class RkPinnLoss(nn.Module):
             LU = torch.stack(Lu_stage, dim=1)  # [B,q,1]
             F_stack = torch.stack(f_stage, dim=1)  # [B,q,1]
 
-            # Interpolant û at collocation nodes (not used currently but computed for completeness)
-            t_eval = t_stage.view(1, q).repeat(self.cfg.n_x_train, 1)  # [B,q]
-            L_eval = lagrange_eval(t_eval, t_stage, w_nodes)  # [B,q,q]
-            _ = torch.einsum("bij,bjk->bik", L_eval, U)  # [B,q,1]
+            # ∂ₜû at the stage nodes, taken analytically from the polynomial time
+            # reconstruction û(t) = Σ_j L_j(t) U_j. Differentiating the interpolant
+            # is what makes the scheme time-discrete: the residual is measured
+            # against û rather than against the raw network, and no extra forward
+            # passes are needed to difference u_θ in t.
+            interp_t, extended = self._interp_nodes(t_stage, times.nodes[n])
+            if extended:
+                t_start = torch.full_like(x, float(times.nodes[n].item()))
+                u_start = self._eval_model(x, t_start)  # [B,1]
+                U_interp = torch.cat([u_start.unsqueeze(1), U], dim=1)  # [B,q+1,1]
+            else:
+                U_interp = U  # [B,q,1]
 
-            # Approximate û_t via symmetric finite differences around each stage time
-            eps = 1e-6 * float(k_n.item())
-            u_t_list: list[Tensor] = []
-            for i in range(q):
-                ti_val = float(t_stage[i].item())
-                t_left = torch.full_like(x, ti_val - eps)
-                t_right = torch.full_like(x, ti_val + eps)
-                ui_r = self._eval_model(x, t_right)
-                ui_l = self._eval_model(x, t_left)
-                u_t_list.append((ui_r - ui_l) / (2.0 * eps))
-            u_t_eval = torch.stack(u_t_list, dim=1)  # [B,q,1]
+            D = differentiation_matrix(interp_t)  # [m,m], m = q or q+1
+            if extended:
+                D = D[1:]  # keep only the rows evaluating at stage nodes
+            u_t_eval = torch.einsum("ij,bjk->bik", D, U_interp)  # [B,q,1]
 
             # In collocation form, Π_{q-1} evaluations at nodes equal values there
             Lhat_proj = LU
