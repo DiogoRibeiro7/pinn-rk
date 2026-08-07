@@ -35,6 +35,18 @@ class RkPinnLoss(nn.Module):
         if cfg.spatial_sampler is None:
             self.cfg.spatial_sampler = self._default_uniform_sampler
 
+        if cfg.init_data is not None:
+            # The H¹ penalty differentiates the sampled u0 along this grid, which is
+            # only meaningful if the samples are ordered.
+            x0_init = cfg.init_data[0]
+            if x0_init.ndim != 2 or x0_init.shape[1] != 1:
+                raise ValueError("init_data x0 must be a [N,1] tensor.")
+            if not bool(torch.all(x0_init[1:, 0] > x0_init[:-1, 0])):
+                raise ValueError(
+                    "init_data x0 must be sorted in strictly increasing order; the "
+                    "initial-condition penalty differentiates u0 on this grid."
+                )
+
         self._cache: dict[int, dict[str, Tensor]] = {}
 
     @staticmethod
@@ -92,7 +104,7 @@ class RkPinnLoss(nn.Module):
             # Interpolant û at collocation nodes (not used currently but computed for completeness)
             t_eval = t_stage.view(1, q).repeat(self.cfg.n_x_train, 1)  # [B,q]
             L_eval = lagrange_eval(t_eval, t_stage, w_nodes)  # [B,q,q]
-            _ = torch.einsum("bij, bj1 -> bi1", L_eval, U)  # [B,q,1]
+            _ = torch.einsum("bij,bjk->bik", L_eval, U)  # [B,q,1]
 
             # Approximate û_t via symmetric finite differences around each stage time
             eps = 1e-6 * float(k_n.item())
@@ -133,14 +145,12 @@ class RkPinnLoss(nn.Module):
                 retain_graph=True,
                 only_inputs=True,
             )[0]
-            grad_u0 = torch.autograd.grad(
-                u0,
-                x0,
-                grad_outputs=torch.ones_like(u0),
-                create_graph=True,
-                retain_graph=True,
-                only_inputs=True,
-            )[0]
+            # u0 is supplied as sampled values and carries no autograd history, so the
+            # target derivative ∂ₓu₀ is taken numerically on the x0 grid rather than by
+            # autograd. Constant w.r.t. θ, hence detached.
+            grad_u0 = torch.gradient(
+                u0.detach().squeeze(1), spacing=(x0.detach().squeeze(1),)
+            )[0].unsqueeze(1)
             total = total + torch.nn.functional.mse_loss(grad_u, grad_u0)
 
         if not torch.isfinite(total):

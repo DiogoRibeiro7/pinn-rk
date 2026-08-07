@@ -12,18 +12,26 @@ class MLP(nn.Module):
     """
 
     def __init__(
-        self, in_dim: int = 2, width: int = 128, depth: int = 4, activation: str = "tanh"
+        self,
+        in_dim: int = 2,
+        width: int = 128,
+        depth: int = 4,
+        activation: str = "tanh",
+        dtype: torch.dtype | None = None,
     ) -> None:
         super().__init__()
         if in_dim != 2:
             raise ValueError("MLP expects in_dim=2 (x,t).")
+        # RK-PINN residuals are ill-conditioned in float32; callers should pass
+        # torch.float64 explicitly rather than rely on the global default dtype.
+        dtype = torch.get_default_dtype() if dtype is None else dtype
         act_cls = nn.Tanh if activation == "tanh" else nn.SiLU
         layers: list[nn.Module] = []
         d = in_dim
         for _ in range(depth):
-            layers += [nn.Linear(d, width), act_cls()]
+            layers += [nn.Linear(d, width, dtype=dtype), act_cls()]
             d = width
-        layers += [nn.Linear(d, 1)]
+        layers += [nn.Linear(d, 1, dtype=dtype)]
         self.net = nn.Sequential(*layers)
 
     def forward(self, x: Tensor, t: Tensor) -> Tensor:

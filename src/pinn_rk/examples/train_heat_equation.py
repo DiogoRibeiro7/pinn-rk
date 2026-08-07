@@ -53,7 +53,7 @@ def train_heat_equation(
         raise ValueError("Unknown RK method.")
 
     mesh = TimeMesh.uniform(T=T, N=N, device=device)
-    model = MLP(in_dim=2, width=128, depth=4, activation="tanh").to(device)
+    model = MLP(in_dim=2, width=128, depth=4, activation="tanh", dtype=torch.float64).to(device)
     L = Laplacian1D()
 
     x0, u0 = make_init_data(n0=128, device=device)
