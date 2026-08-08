@@ -270,7 +270,7 @@ If you use this software in your research, please cite it:
 }
 ```
 
-The DOI above is the **concept DOI**: it always resolves to the latest version. To cite a specific release, use its own DOI instead — `10.5281/zenodo.21843920` for v0.2.0, `10.5281/zenodo.21839392` for v0.1.0.
+The DOI above is the **concept DOI**: it always resolves to the latest version. To cite a specific release, use its own DOI instead — `10.5281/zenodo.21850047` for v0.3.0, `10.5281/zenodo.21843920` for v0.2.0, `10.5281/zenodo.21839392` for v0.1.0.
 
 Or see [CITATION.cff](./CITATION.cff) for the full citation information.
 
