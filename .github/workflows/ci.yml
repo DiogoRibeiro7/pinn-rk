@@ -35,7 +35,7 @@ jobs:
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: "1.8.3"
+          poetry-version: "2.2.1"
 
       - name: Configure Poetry
         run: |
@@ -120,7 +120,7 @@ jobs:
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: "1.8.3"
+          poetry-version: "2.2.1"
           
       - name: Install dependencies
         run: |
@@ -147,7 +147,7 @@ jobs:
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: "1.8.3"
+          poetry-version: "2.2.1"
           
       - name: Install dependencies
         run: poetry install --no-interaction
@@ -177,7 +177,7 @@ jobs:
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: "1.8.3"
+          poetry-version: "2.2.1"
           
       - name: Install dependencies
         run: poetry install --no-interaction --only dev
@@ -230,7 +230,7 @@ jobs:
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: "1.8.3"
+          poetry-version: "2.2.1"
           
       - name: Build package
         run: poetry build
