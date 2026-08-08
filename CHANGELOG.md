@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Nothing yet
+
+## [0.3.0] - 2026-08-08
+
+Brings the Butcher matrix `A` into the loss, so the residual is the Runge-Kutta
+method rather than a reconstruction that merely borrowed its nodes and weights.
+Each tableau now recovers its own classical order; previously all three behaved
+identically because `A` was validated and never read.
+
+Users upgrading from 0.2.0 should expect different loss values and different
+trained weights, and should read the note in the README on what the consistency
+measurements do and do not imply about training.
+
 ### Added
 
 - `RkPinnConfig.residual`, selecting which residual the loss imposes.
@@ -278,4 +291,5 @@ When making changes:
 
 [0.1.0]: https://github.com/DiogoRibeiro7/pinn-rk/releases/tag/v0.1.0
 [0.2.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.1.0...v0.2.0
-[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.2.0...HEAD
+[0.3.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.2.0...v0.3.0
+[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.3.0...HEAD
