@@ -6,7 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-- Nothing yet
+### Added
+
+- `examples/notebooks/visualization.ipynb` — training history shown with its stochastic
+  noise rather than smoothed, solution evolution against the exact solution, a
+  space-time error heat map, an interactive Plotly time slider, and a same-seed
+  comparison of `residual="rk"` against `residual="interpolant"`.
+- `examples/notebooks/benchmarking.ipynb` — cost per step split into forward and
+  backward, scaling in slabs and spatial batch, autograd-graph memory, a CPU/GPU (or
+  thread-count) comparison, and the accuracy-per-unit-cost study showing all three
+  2-stage tableaux recovering classical orders 4, 3 and 2.
+- `tests/test_notebooks.py`, asserting the committed notebooks parse, store no error
+  outputs, and were genuinely executed rather than authored by hand. It reads the
+  notebooks as plain JSON so it runs in CI, where the optional `examples` dependency
+  group is not installed.
+
+### Fixed
+
+- `examples/README.md` documented `03_custom_operator.py`, `04_convergence_study.py`,
+  and both notebooks, none of which existed. The notebooks now exist; the two scripts
+  are labelled as not yet written instead of being advertised as available.
+- Removed a malformed YAML front-matter block at the top of `examples/README.md`, which
+  rendered as raw text and duplicated the description of example 02.
+- Replaced the "Convergence Rates" table in `examples/README.md`. Its figures were
+  invented — a suspiciously smooth 0.91/0.92/0.92 — and are now the measured
+  consistency orders, labelled as such rather than implied to be trained-model results.
+- The documented `--save-plots`, `--output-dir` and `--export-csv` flags belonged to a
+  script that does not exist. Only flags the examples actually accept are shown.
 
 ## [0.3.0] - 2026-08-08
 
