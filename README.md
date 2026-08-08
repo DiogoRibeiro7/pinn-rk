@@ -80,20 +80,48 @@ $$
 
 Here $\hat{u}$ is a polynomial time interpolant on each slab, and $\Pi_{q-1}$, $\tilde{\Pi}_{q-1}$ are degree $q-1$ projections realized at the collocation nodes.
 
-$\partial_t\hat{u}$ is obtained **analytically**, by applying the barycentric differentiation matrix $D_{ij} = L_j'(t_i)$ to the stage values — the network is never differentiated in $t$ by finite differences.
+### The residual
 
-### Consistency of the time reconstruction
+Writing the semi-discrete problem as $u' = f - \mathcal{L}u =: F$, the Runge–Kutta method is *defined* by its stage and update equations:
 
-Because $\hat{u}$ is a polynomial approximation in time, the residual carries a truncation error: it does **not** vanish on the exact solution. Since training minimises the residual, that error sets a floor on attainable accuracy. Feeding the manufactured solution $u = \sin(\pi x)e^{-\pi^2 t}$ through the residual isolates it:
+$$
+U_i = u_n + k\sum_j a_{ij} F_j, \qquad u_{n+1} = u_n + k\sum_i b_i F_i .
+$$
+
+`pinn-rk` imposes both directly on the network (`residual="rk"`, the default), dividing by $k$ so they carry the units of a time derivative:
+
+$$
+r_i = \frac{U_i - u_n}{k} - \sum_j a_{ij} F_j , \qquad r_{\text{step}} = \frac{u_{n+1} - u_n}{k} - \sum_i b_i F_i .
+$$
+
+This uses the **full** Butcher tableau — including the coupling matrix $A$ — so the scheme inherits the tableau's own accuracy. Feeding the manufactured solution $u = \sin(\pi x)e^{-\pi^2 t}$ through the residual leaves only local truncation error:
+
+| tableau | $r_{\text{step}}$ at $k=5\times10^{-3}$ | observed order | classical order $p$ |
+| --- | --- | --- | --- |
+| `gauss2` | $1.3\times10^{-8}$ | $3.96$ | 4 |
+| `radau2` | $5.3\times10^{-6}$ | $2.96$ | 3 |
+| `lobatto2` | $2.0\times10^{-3}$ | $1.96$ | 2 |
+
+The stage residual converges at the **stage order** ($2$ for all three q=2 collocation tableaux); the update residual recovers each method's **classical order**. This is what makes the choice of tableau meaningful: Gauss and Radau cost the same two stages, and Gauss is two orders of magnitude more consistent at the same slab size. Orders are pinned by `tests/test_rk_order.py`.
+
+Lobatto IIIA is *stiffly accurate* — its $b$ equals the last row of $A$ — so its update and final stage residuals coincide exactly.
+
+### The interpolant residual (`residual="interpolant"`)
+
+The pre-0.3 formulation is retained for comparison. It reconstructs $\hat{u}$ as a polynomial in time through the stage values, differentiates it analytically via the barycentric differentiation matrix $D_{ij} = L_j'(t_i)$, and imposes $u_t + \mathcal{L}u - f$. It uses only $c$ and $b$, **ignoring $A$**, so every tableau behaves identically and accuracy follows the degree of $\hat{u}$ rather than the order of the method:
 
 | stencil (`q_aux`) | $\deg\hat{u}$ | max residual at $k=5\times10^{-3}$ | observed order |
 | --- | --- | --- | --- |
 | `"same"` — stage nodes only | $q-1$ | $1.6\times10^{-1}$ | $\mathcal{O}(k)$ |
 | `"extend"` — plus slab start | $q$ | $2.6\times10^{-3}$ | $\mathcal{O}(k^2)$ |
 
-`"extend"` is the default for this reason. Lobatto IIIA is the exception: its first node already sits at $t_n$ ($c_1 = 0$), so the stencil cannot be extended without duplicating a node, and it stays first order. Both orders are pinned by `tests/test_time_reconstruction.py`.
+For Gauss the RK form is roughly $10^5$ times more consistent than this at the same slab size. `q_aux` applies only to this setting and is ignored under `residual="rk"`.
 
-> **Known limitation.** The residual currently uses only the RK nodes $c$ and quadrature weights $b$. The Butcher coupling matrix $A$ is validated but not yet used, so accuracy is governed by the degree of $\hat{u}$ rather than by the classical order of the tableau (3 for Radau IIA, 4 for Gauss). Raising $q$ is the lever that improves it today — see [ROADMAP.md](./ROADMAP.md).
+> **What consistency does and does not tell you.** The tables above measure *truncation error* — the residual left on the exact solution — which bounds the best a perfectly trained network could do. It does not predict optimisation behaviour. In short single-seed training runs on the heat-equation example the two forms trade places depending on the tableau and the step budget, and the loss trace is non-monotonic because the spatial sampler redraws each step. Treat the training comparison as unresolved: a fair answer needs several seeds and converged runs. `residual` exists so the comparison can be made rather than assumed.
+
+### Balancing the two loss terms
+
+The objective sums the PDE residual and the initial-condition penalty. Their relative size is **not** stable: on the shipped example the penalty is essentially the entire loss at initialisation ($5.1$ against a residual of $1.7\times10^{-4}$) and roughly a fifth of it after a few hundred steps. Training therefore starts by fitting the initial condition almost exclusively. `RkPinnConfig.ic_weight` scales the penalty so this can be controlled; `ic_weight=0.0` drops it entirely and measures the residual alone.
 
 ---
 
@@ -147,6 +175,8 @@ $u_\theta(x,t) = \Phi(x) \, g_\theta(x,t)$ with $\Phi(x) = x(1-x)$.
 **Purpose.** Configuration for assembling the time‑discrete loss.
 
 * Key fields: `tableau`, `time_mesh`, `n_x_train`, `spatial_sampler`, `init_data`.
+* `residual`: `"rk"` (default) imposes the stage and update equations of the full Butcher tableau; `"interpolant"` selects the pre‑0.3 reconstruction‑derivative form.
+* `q_aux`: `"same"` or `"extend"` — reconstruction stencil, used only when `residual="interpolant"`.
 
 ### `RkPinnLoss`
 
@@ -174,9 +204,15 @@ $\partial_t\hat{u}$ at the stage nodes is `D @ U`, taken analytically from the i
 
 ## Choosing the RK scheme
 
-* **`gauss2`** (Gauss–Legendre): higher order, A‑stable; good accuracy per stage.
-* **`radau2`** (Radau IIA): L‑stable; robust for stiff operators (recommended default).
-* **`lobatto2`** (Lobatto IIIA): trapezoidal rule; symmetric, A‑stable.
+All three are 2‑stage, so they cost the same per slab. Under `residual="rk"` they differ in accuracy, and the trade‑off is the classical one between order and stability:
+
+| scheme | classical order | stability | notes |
+| --- | --- | --- | --- |
+| `gauss2` (Gauss–Legendre) | **4** | A‑stable | most accurate per stage; symplectic |
+| `radau2` (Radau IIA) | **3** | **L‑stable** | damps stiff transients; safest default |
+| `lobatto2` (Lobatto IIIA) | **2** | A‑stable | trapezoidal rule; symmetric, stiffly accurate |
+
+Prefer `gauss2` for accuracy on smooth problems and `radau2` when the operator is stiff — A‑stability alone does not damp the stiffest modes, which is why Radau IIA remains the robust choice despite the lower order.
 
 Switch via the `method` argument in `train_heat_equation`.
 

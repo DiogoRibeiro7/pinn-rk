@@ -29,8 +29,15 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Goal:** Expand RK methods and core numerics.
 
-* [ ] **Higher‑order RK**: Gauss, Radau IIA, Lobatto for q=3,4.
-* [ ] **Analytic time derivative** of the Lagrange interpolant (\hat u_t) (replace finite‑diff).
+* [ ] **Higher‑order RK**: Gauss, Radau IIA, Lobatto for q=3,4. Now worth more than
+  before: since the residual uses the Butcher matrix `A`, the update equation
+  converges at the tableau's classical order, so raising q raises the order.
+* [x] **Analytic time derivative** of the Lagrange interpolant (\hat u_t) (replace finite‑diff)
+  — done in v0.2.0, and retained as `residual="interpolant"`.
+* [x] **Full Butcher tableau in the residual** — the stage equations bring `A` into
+  the loss, giving measured orders of 4 (Gauss q=2), 3 (Radau IIA q=2) and
+  2 (Lobatto IIIA q=2). Previously `A` was validated but never read, so the choice
+  of tableau had no effect on accuracy.
 * [ ] **Sampling strategies**: uniform | Sobol | Halton; stratified in time.
 * [ ] **Operators**: Laplacian2D/3D; rectangular domains.
 * [ ] **Boundary handling options**: hard BC via (\phi(x)) vs soft penalty; switchable.

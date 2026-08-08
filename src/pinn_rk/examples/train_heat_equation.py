@@ -45,6 +45,7 @@ def train_heat_equation(
     steps: int = 5000,
     lr: float = 1e-3,
     device: torch.device = torch.device("cpu"),
+    residual: Literal["rk", "interpolant"] = "rk",
 ) -> nn.Module:
     torch.set_default_dtype(torch.float64)
 
@@ -70,6 +71,7 @@ def train_heat_equation(
         device=device,
         dtype=torch.float64,
         init_data=(x0, u0),
+        residual=residual,
     )
     loss_fn = RkPinnLoss(model=model, Lop=L, f_rhs=exact_f, cfg=cfg).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
