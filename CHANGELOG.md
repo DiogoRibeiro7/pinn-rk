@@ -8,12 +8,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- `RkPinnConfig.residual`, selecting which residual the loss imposes.
+  `"rk"` (new default) uses the **full Butcher tableau**: the stage equations
+  `U_i = u_n + k Σ_j a_ij F_j` bring the coupling matrix `A` into the loss for the
+  first time, and the update equation `u_{n+1} = u_n + k Σ_i b_i F_i` carries the
+  tableau's classical order. `"interpolant"` is the previous behaviour, retained
+  for comparison.
+- `RkPinnLoss.rk_residuals(...)`, returning the stage and update residuals
+  separately. They converge at different rates and only the update residual
+  reflects the classical order, so they are measured independently.
+- `residual` argument on `train_heat_equation`.
+- `tests/test_rk_order.py`, pinning the measured convergence orders per tableau.
+- `RkPinnConfig.ic_weight`, scaling the initial-condition penalty against the PDE
+  residual. The two were summed unweighted and their balance drifts sharply during
+  training: on the shipped example the penalty is essentially the whole loss at
+  initialisation (5.1 against a residual of 1.7e-4) and about a fifth of it after a
+  few hundred steps, so training begins by fitting the initial condition almost
+  exclusively. `ic_weight=0.0` drops the penalty and measures the residual alone.
 - Zenodo DOIs, now that the archive exists. The README badge and BibTeX entry, and
   `CITATION.cff`, carry the concept DOI `10.5281/zenodo.21839391`, which always
   resolves to the latest version; the per-version DOIs are recorded alongside it.
 - A documented release checklist in `CONTRIBUTING.md`, covering the four places the
   version has to agree, why `.zenodo.json` deliberately carries no version field,
   and the fact that publishing a release mints a DOI and is not reversible.
+
+### Changed
+
+- **The choice of Butcher tableau now affects accuracy.** Measured on the
+  manufactured solution, the update residual converges at each method's classical
+  order — 4 for Gauss q=2, 3 for Radau IIA q=2, 2 for Lobatto IIIA q=2 — against
+  a uniform order 2 previously. At the slab size used by the shipped example the
+  Gauss update residual is 1.3e-8, roughly 10^5 times smaller than the
+  interpolant form's 1.8e-3. Under the old residual all three tableaux behaved
+  identically, because `A` was never read.
+- `RkPinnConfig` gained a field ahead of `q_aux`, so any caller passing
+  configuration positionally past `time_mesh` must move to keyword arguments.
+  Everything in this repository already used keywords.
+- `q_aux` now applies only when `residual="interpolant"`, and is ignored otherwise.
 
 ### Removed
 

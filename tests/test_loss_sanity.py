@@ -57,6 +57,55 @@ def test_loss_decreases_a_few_steps() -> None:
     assert loss1 < loss0, f"Loss did not decrease: {loss0:.3e} -> {loss1:.3e}"
 
 
+def _ic_cfg(ic_weight: float, init: bool = True) -> RkPinnConfig:
+    torch.set_default_dtype(torch.float64)
+    device = torch.device("cpu")
+    x0, u0 = make_init_data(32, device)
+    return RkPinnConfig(
+        tableau=butcher_radau_iia_q2(device),
+        time_mesh=TimeMesh.uniform(T=0.05, N=3, device=device),
+        n_x_train=32,
+        device=device,
+        init_data=(x0, u0) if init else None,
+        ic_weight=ic_weight,
+    )
+
+
+def _loss_at(cfg: RkPinnConfig, seed: int = 0) -> float:
+    torch.manual_seed(seed)
+    model = MLP(dtype=torch.float64)
+    fn = RkPinnLoss(model=model, Lop=Laplacian1D(), f_rhs=exact_f, cfg=cfg)
+    # Fixed sampler so the PDE term is identical across configurations.
+    xs = torch.linspace(1e-6, 1 - 1e-6, cfg.n_x_train, dtype=torch.float64).unsqueeze(1)
+    fn.cfg.spatial_sampler = lambda n, device: xs.clone()
+    return float(fn().item())
+
+
+def test_ic_weight_scales_only_the_initial_condition_term() -> None:
+    """Doubling the weight must add exactly one more copy of the penalty."""
+    pde_only = _loss_at(_ic_cfg(1.0, init=False))
+    at1 = _loss_at(_ic_cfg(1.0))
+    at2 = _loss_at(_ic_cfg(2.0))
+    penalty = at1 - pde_only
+    assert penalty > 0.0
+    assert at2 - pde_only == pytest.approx(2.0 * penalty, rel=1e-9)
+
+
+def test_ic_weight_zero_drops_the_penalty() -> None:
+    """Zero weight must reproduce the loss with no initial data at all."""
+    assert _loss_at(_ic_cfg(0.0)) == pytest.approx(_loss_at(_ic_cfg(1.0, init=False)), rel=1e-12)
+
+
+def test_ic_weight_rejects_negative_values() -> None:
+    with pytest.raises(ValueError, match="ic_weight"):
+        RkPinnLoss(
+            model=MLP(dtype=torch.float64),
+            Lop=Laplacian1D(),
+            f_rhs=exact_f,
+            cfg=_ic_cfg(-1.0),
+        )
+
+
 def _build(tableau_fn, q_aux: str) -> RkPinnLoss:
     torch.set_default_dtype(torch.float64)
     device = torch.device("cpu")

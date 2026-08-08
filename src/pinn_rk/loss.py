@@ -35,6 +35,9 @@ class RkPinnLoss(nn.Module):
         if cfg.spatial_sampler is None:
             self.cfg.spatial_sampler = self._default_uniform_sampler
 
+        if cfg.ic_weight < 0.0:
+            raise ValueError("ic_weight must be non-negative.")
+
         if cfg.init_data is not None:
             # The H¹ penalty differentiates the sampled u0 along this grid, which is
             # only meaningful if the samples are ordered.
@@ -86,12 +89,128 @@ class RkPinnLoss(nn.Module):
             return torch.cat([t_n.reshape(1), t_stage]), True
         return t_stage, False
 
+    def _stage_values(self, x: Tensor, t_stage: Tensor) -> tuple[Tensor, Tensor, Tensor]:
+        """
+        Evaluate the network and the PDE operator at the stage nodes.
+
+        Returns ``(U, LU, F_rhs)``, each ``[B, q, 1]``.
+        """
+        u_stage: list[Tensor] = []
+        Lu_stage: list[Tensor] = []
+        f_stage: list[Tensor] = []
+        for i in range(t_stage.numel()):
+            ti = torch.full_like(x, fill_value=t_stage[i].item())
+            ui = self._eval_model(x, ti)  # [B,1]
+            u_stage.append(ui)
+            Lu_stage.append(self.L(x, ui))  # [B,1]
+            f_stage.append(self.f_rhs(x, ti))
+        return (
+            torch.stack(u_stage, dim=1),
+            torch.stack(Lu_stage, dim=1),
+            torch.stack(f_stage, dim=1),
+        )
+
+    def _slab_loss_rk(self, x: Tensor, n: int, k_n: Tensor, t_stage: Tensor) -> Tensor:
+        """
+        Runge-Kutta collocation residual, built from the full Butcher tableau.
+
+        Writing the semi-discrete problem as u' = f - L u =: F, the method is defined
+        by the stage equations and the update equation
+
+            U_i     = u_n + k Σ_j a_ij F_j,
+            u_{n+1} = u_n + k Σ_i b_i F_i,
+
+        which are imposed here as residuals on the network. Dividing by k gives them
+        the units of a time derivative, so they stay comparable across slab sizes:
+
+            r_i    = (U_i - u_n)/k     - Σ_j a_ij F_j,
+            r_step = (u_{n+1} - u_n)/k - Σ_i b_i F_i.
+
+        Unlike differentiating an interpolant, this uses A, and so reproduces the
+        tableau's own accuracy: the stage residual carries the method's stage order
+        and the update residual its classical order (4 for Gauss q=2, 3 for Radau
+        IIA q=2, 2 for Lobatto IIIA q=2).
+        """
+        bt = self.cfg.tableau
+        q = bt.c.numel()
+        b = bt.b.to(device=self.cfg.device, dtype=self.cfg.dtype)  # [q]
+
+        r_stage, r_step = self.rk_residuals(x, n, k_n, t_stage)
+        sq_stage = (r_stage**2).mean(dim=0)  # [q,1]
+        sq_step = (r_step**2).mean(dim=0)  # [1]
+        return k_n * (torch.sum(b.view(q, 1) * sq_stage) + torch.sum(sq_step))
+
+    def rk_residuals(
+        self, x: Tensor, n: int, k_n: Tensor, t_stage: Tensor
+    ) -> tuple[Tensor, Tensor]:
+        """
+        Stage and update residuals of the Runge-Kutta collocation form on slab ``n``.
+
+        Exposed separately from the loss so the two can be measured independently:
+        they converge at different rates, and only the update residual reflects the
+        tableau's classical order.
+
+        Returns ``(r_stage, r_step)`` with shapes ``[B, q, 1]`` and ``[B, 1]``.
+        """
+        device, dtype = self.cfg.device, self.cfg.dtype
+        bt = self.cfg.tableau
+        A = bt.A.to(device=device, dtype=dtype)  # [q,q]
+        b = bt.b.to(device=device, dtype=dtype)  # [q]
+        times = self.cfg.time_mesh
+
+        u_n = self._eval_model(x, torch.full_like(x, float(times.nodes[n].item())))  # [B,1]
+        U, LU, F_rhs = self._stage_values(x, t_stage)
+        F = F_rhs - LU  # u' = f - L u, evaluated at the stage nodes  [B,q,1]
+
+        # Stage equations: these are what bring A into the loss.
+        r_stage = (U - u_n.unsqueeze(1)) / k_n - torch.einsum("ij,bjk->bik", A, F)  # [B,q,1]
+
+        # Update equation, carrying the tableau's classical order.
+        u_next = self._eval_model(x, torch.full_like(x, float(times.nodes[n + 1].item())))
+        r_step = (u_next - u_n) / k_n - torch.einsum("i,bik->bk", b, F)  # [B,1]
+        return r_stage, r_step
+
+    def _slab_loss_interpolant(self, x: Tensor, n: int, k_n: Tensor, t_stage: Tensor) -> Tensor:
+        """
+        Residual measured against the polynomial time reconstruction.
+
+        ∂ₜû at the stage nodes is taken analytically from û(t) = Σ_j L_j(t) U_j, so
+        the network is never differentiated in t. This uses only the nodes c and the
+        quadrature weights b; accuracy follows the degree of û rather than the order
+        of the tableau. See ``q_aux`` for the choice of reconstruction stencil.
+        """
+        device, dtype = self.cfg.device, self.cfg.dtype
+        bt = self.cfg.tableau
+        q = bt.c.numel()
+        times = self.cfg.time_mesh
+
+        U, LU, F_stack = self._stage_values(x, t_stage)
+
+        interp_t, extended = self._interp_nodes(t_stage, times.nodes[n])
+        if extended:
+            t_start = torch.full_like(x, float(times.nodes[n].item()))
+            u_start = self._eval_model(x, t_start)  # [B,1]
+            U_interp = torch.cat([u_start.unsqueeze(1), U], dim=1)  # [B,q+1,1]
+        else:
+            U_interp = U  # [B,q,1]
+
+        D = differentiation_matrix(interp_t)  # [m,m], m = q or q+1
+        if extended:
+            D = D[1:]  # keep only the rows evaluating at stage nodes
+        u_t_eval = torch.einsum("ij,bjk->bik", D, U_interp)  # [B,q,1]
+
+        # In collocation form, Π_{q-1} evaluations at nodes equal values there
+        res = u_t_eval + LU - F_stack  # [B,q,1]
+        b = bt.b.view(1, q, 1).to(device=device, dtype=dtype)  # [1,q,1]
+
+        # integrate over time slab with RK weights (mean over x)
+        sq = (res**2).mean(dim=0, keepdim=False)  # [q,1]
+        return k_n * torch.sum(b * sq)
+
     def forward(self) -> Tensor:
         device = self.cfg.device
         dtype = self.cfg.dtype
-        bt = self.cfg.tableau
         times = self.cfg.time_mesh
-        q = bt.c.numel()
 
         total = torch.zeros((), device=device, dtype=dtype)
 
@@ -99,58 +218,15 @@ class RkPinnLoss(nn.Module):
             k_n = times.steps[n]
             assert self.cfg.spatial_sampler is not None
             x = self.cfg.spatial_sampler(self.cfg.n_x_train, device)  # [B,1]
-
-            # Stage times on J_n
             t_stage = self._stage_times(n)  # [q]
 
-            # Evaluate at stage nodes
-            u_stage: list[Tensor] = []
-            Lu_stage: list[Tensor] = []
-            f_stage: list[Tensor] = []
-
-            for i in range(q):
-                ti = torch.full_like(x, fill_value=t_stage[i].item())
-                ui = self._eval_model(x, ti)  # [B,1]
-                u_stage.append(ui)
-                Lu_stage.append(self.L(x, ui))  # [B,1]
-                f_stage.append(self.f_rhs(x, ti))
-
-            U = torch.stack(u_stage, dim=1)  # [B,q,1]
-            LU = torch.stack(Lu_stage, dim=1)  # [B,q,1]
-            F_stack = torch.stack(f_stage, dim=1)  # [B,q,1]
-
-            # ∂ₜû at the stage nodes, taken analytically from the polynomial time
-            # reconstruction û(t) = Σ_j L_j(t) U_j. Differentiating the interpolant
-            # is what makes the scheme time-discrete: the residual is measured
-            # against û rather than against the raw network, and no extra forward
-            # passes are needed to difference u_θ in t.
-            interp_t, extended = self._interp_nodes(t_stage, times.nodes[n])
-            if extended:
-                t_start = torch.full_like(x, float(times.nodes[n].item()))
-                u_start = self._eval_model(x, t_start)  # [B,1]
-                U_interp = torch.cat([u_start.unsqueeze(1), U], dim=1)  # [B,q+1,1]
+            if self.cfg.residual == "rk":
+                total = total + self._slab_loss_rk(x, n, k_n, t_stage)
             else:
-                U_interp = U  # [B,q,1]
-
-            D = differentiation_matrix(interp_t)  # [m,m], m = q or q+1
-            if extended:
-                D = D[1:]  # keep only the rows evaluating at stage nodes
-            u_t_eval = torch.einsum("ij,bjk->bik", D, U_interp)  # [B,q,1]
-
-            # In collocation form, Π_{q-1} evaluations at nodes equal values there
-            Lhat_proj = LU
-            f_proj = F_stack
-
-            res = u_t_eval + Lhat_proj - f_proj  # [B,q,1]
-            b = bt.b.view(1, q, 1).to(device=device, dtype=dtype)  # [1,q,1]
-
-            # integrate over time slab with RK weights (mean over x)
-            sq = (res**2).mean(dim=0, keepdim=False)  # [q,1]
-            slab = k_n * torch.sum(b * sq)
-            total = total + slab
+                total = total + self._slab_loss_interpolant(x, n, k_n, t_stage)
 
         # Initial condition H¹ seminorm penalty if provided
-        if self.cfg.init_data is not None:
+        if self.cfg.init_data is not None and self.cfg.ic_weight != 0.0:
             x0, u0 = self.cfg.init_data
             x0 = x0.to(device=device, dtype=dtype)
             u0 = u0.to(device=device, dtype=dtype)
@@ -170,7 +246,7 @@ class RkPinnLoss(nn.Module):
             x0_grid = x0.detach().squeeze(1)
             u0_grid = u0.detach().squeeze(1)
             grad_u0 = torch.gradient(u0_grid, spacing=(x0_grid,))[0].unsqueeze(1)
-            total = total + torch.nn.functional.mse_loss(grad_u, grad_u0)
+            total = total + self.cfg.ic_weight * torch.nn.functional.mse_loss(grad_u, grad_u0)
 
         if not torch.isfinite(total):
             raise FloatingPointError("Non-finite loss encountered.")
