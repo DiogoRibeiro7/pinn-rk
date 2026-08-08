@@ -1,15 +1,3 @@
----
->-
-  Compare Gauss, Radau, and Lobatto methods on the same problem.
-
-  ```python python examples/02_different_rk_methods.py ```
-
-  **What it demonstrates:** - Training with different RK schemes - Convergence
-  comparison - Stability analysis - Performance benchmarking
-
-  **Expected runtime:** ~3-5 minutes on CPU
----
-
 # Examples
 
 This directory contains practical examples demonstrating how to use pinn-rk for solving PDEs.
@@ -33,75 +21,75 @@ python examples/01_basic_heat_equation.py
 
 **Expected runtime:** ~1-2 minutes on CPU
 
-### 3\. Custom Operator (`03_custom_operator.py`)
+### 2\. Comparing RK schemes (`02_different_rk_methods.py`)
 
-Implement a custom PDE operator for a reaction-diffusion equation.
+Compare Gauss, Radau IIA and Lobatto IIIA on the same problem.
 
-```python
-python examples/03_custom_operator.py
+```bash
+python examples/02_different_rk_methods.py
 ```
 
 **What it demonstrates:**
 
-- Implementing `EllipticOperator` protocol
-- Adding reaction terms
-- Custom right-hand side functions
-- Operator validation
+- Training with different RK schemes
+- Accuracy comparison at identical cost — all three are 2-stage
+- Timing per scheme
 
-**Expected runtime:** ~2-3 minutes on CPU
+**Expected runtime:** ~3-5 minutes on CPU
 
 --------------------------------------------------------------------------------
 
-### 4\. Convergence Study (`04_convergence_study.py`)
-
-Systematic study of convergence with respect to time steps and training.
-
-```python
-python examples/04_convergence_study.py --save-plots
-```
-
-**What it demonstrates:**
-
-- Sweeping over N (number of time steps)
-- Measuring convergence rates
-- Generating publication-ready plots
-- Error analysis
-
-**Expected runtime:** ~10-15 minutes on CPU
+> **Not yet written.** `03_custom_operator.py` (a custom `EllipticOperator` for
+> reaction-diffusion) and `04_convergence_study.py` (a sweep over `N` with rate
+> estimates) are planned but do not exist yet — see [ROADMAP.md](../ROADMAP.md).
+> The convergence behaviour they would show is measured today in
+> `notebooks/benchmarking.ipynb` and pinned by `tests/test_rk_order.py`.
 
 --------------------------------------------------------------------------------
 
 ## Jupyter Notebooks
 
-### Visualization Notebook (`notebooks/visualization.ipynb`)
-
-Interactive notebook for visualizing PINN solutions.
-
-**Contents:**
-
-- Solution evolution over time
-- Error distribution plots
-- Training loss curves
-- Interactive parameter exploration
+Both notebooks are committed **with their outputs**, so they render on GitHub without
+being run. Every figure and number in them was produced by executing the notebook
+against the current code, not written by hand.
 
 **Requirements:**
 
 ```bash
-pip install jupyter matplotlib plotly
+poetry install --with examples     # jupyter, matplotlib, plotly
+poetry run jupyter lab examples/notebooks
 ```
 
---------------------------------------------------------------------------------
+### Visualization (`notebooks/visualization.ipynb`)
 
-### Benchmarking Notebook (`notebooks/benchmarking.ipynb`)
-
-Comprehensive benchmarking across different configurations.
+Trains an RK-PINN on the heat equation and inspects what it learned.
 
 **Contents:**
 
-- Performance profiling
-- Memory usage analysis
-- GPU vs CPU comparison
-- Scaling studies
+- Training loss history, shown with its stochastic noise rather than smoothed
+- Solution evolution against the exact solution
+- Space-time error heat map, and how the error behaves in time
+- Interactive time slider (Plotly — requires running locally; GitHub does not execute JS)
+- `residual="rk"` vs `residual="interpolant"` on the same seed
+
+**Expected runtime:** ~1-2 minutes on CPU
+
+--------------------------------------------------------------------------------
+
+### Benchmarking (`notebooks/benchmarking.ipynb`)
+
+What a loss evaluation costs, how it scales, and what accuracy each tableau buys.
+
+**Contents:**
+
+- Cost per step, split into forward and backward
+- Scaling in time slabs `N` and spatial batch `n_x_train`
+- Autograd-graph memory, and CUDA peak allocation where available
+- CPU vs GPU, or a CPU thread-count sweep when no GPU is present
+- **Accuracy per unit cost:** all three tableaux are 2-stage, yet recover classical
+  orders 4, 3 and 2 — measured, not asserted
+
+**Expected runtime:** ~1-2 minutes on CPU
 
 --------------------------------------------------------------------------------
 
@@ -133,15 +121,15 @@ CUDA_VISIBLE_DEVICES=0 python examples/01_basic_heat_equation.py
 ### Saving Results
 
 ```bash
-# Save plots
-python examples/04_convergence_study.py --save-plots --output-dir ./results
-
 # Save trained model
 python examples/01_basic_heat_equation.py --save-model ./model.pth
 
-# Export data
-python examples/04_convergence_study.py --export-csv ./data.csv
+# Full flag list for any example
+python examples/01_basic_heat_equation.py --help
 ```
+
+Plot and CSV export were previously documented here for `04_convergence_study.py`, which
+does not exist. Use `notebooks/benchmarking.ipynb` for convergence data in the meantime.
 
 --------------------------------------------------------------------------------
 
@@ -178,22 +166,36 @@ if __name__ == "__main__":
 
 ## Expected Results
 
-### Heat Equation (Radau IIA, N=20, 1000 steps)
+### Heat equation (Radau IIA, `T=0.1`, `N=8`, 400 steps)
+
+Ballpark from `notebooks/visualization.ipynb`; the loss is stochastic, so a single value
+is not meaningful on its own:
 
 ```plaintext
-[  500] loss = 2.451e-03
-[ 1000] loss = 8.327e-04
-L2 error at T=0.1: 3.42e-02
+L2 error at t=0    : ~3e-02
+L2 error at t=0.10 : ~2e-02
 ```
 
-### Convergence Rates
+Absolute error falls with time because the solution itself decays by
+$e^{-\pi^2 T}\approx 0.37$; relative error grows. Expect run-to-run variation — the
+spatial sampler redraws every step.
 
-N (steps) | L2 Error | Rate
---------- | -------- | ----
-5         | 1.2e-01  | -
-10        | 6.4e-02  | 0.91
-20        | 3.4e-02  | 0.92
-40        | 1.8e-02  | 0.92
+### Convergence of the residual
+
+These are **consistency** orders: the residual left on the exact solution, which
+isolates truncation error. Measured by `tests/test_rk_order.py` and reproduced in
+`notebooks/benchmarking.ipynb`:
+
+| tableau | update residual at k=5e-3 | measured order | classical order |
+| --- | --- | --- | --- |
+| `gauss2` | 1.3e-08 | 3.97 | 4 |
+| `radau2` | 5.3e-06 | 2.97 | 3 |
+| `lobatto2` | 2.0e-03 | 1.97 | 2 |
+
+This bounds what a perfectly trained network could achieve; it is **not** a trained-model
+convergence study. A rate table for trained L2 error against `N` would need several
+seeds and converged runs, which is exactly what `04_convergence_study.py` is meant to
+provide once written.
 
 --------------------------------------------------------------------------------
 
@@ -374,4 +376,4 @@ If you use these examples in your research, please cite the pinn-rk library. See
 
 --------------------------------------------------------------------------------
 
-Last updated: October 2025
+Last updated: August 2026 (pinn-rk v0.3.0)

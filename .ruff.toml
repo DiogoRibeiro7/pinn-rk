@@ -16,3 +16,6 @@ ignore = [
 "src/pinn_rk/examples/*.py" = ["T201"]
 # Relax some rules for tests
 "tests/*.py" = ["T201"]
+# Notebooks: print is how a notebook reports results, and dict(...) rather than a
+# literal is the idiom throughout Plotly's own documentation.
+"examples/notebooks/*.ipynb" = ["T201", "C408"]

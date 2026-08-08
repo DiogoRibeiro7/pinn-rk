@@ -235,6 +235,26 @@ Switch via the `method` argument in `train_heat_equation`.
 
 ---
 
+## Examples and notebooks
+
+Runnable scripts live in [`examples/`](./examples), and two notebooks in
+[`examples/notebooks/`](./examples/notebooks) are committed **with their outputs**, so they
+render on GitHub without being run:
+
+* [`visualization.ipynb`](./examples/notebooks/visualization.ipynb) — training history, solution evolution against the exact solution, a space‑time error map, an interactive time slider, and `residual="rk"` vs `"interpolant"` on one seed.
+* [`benchmarking.ipynb`](./examples/notebooks/benchmarking.ipynb) — cost per step, scaling in `N` and `n_x_train`, memory, CPU/GPU, and the accuracy‑per‑unit‑cost study reproducing the convergence orders above.
+
+```bash
+poetry install --with examples
+poetry run jupyter lab examples/notebooks
+```
+
+Every figure and number in them was produced by executing the notebook against the
+current code. `tests/test_notebooks.py` asserts they parse, store no error outputs, and
+were genuinely executed rather than authored by hand.
+
+---
+
 ## Benchmarks (indicative)
 
 Training the heat‑equation example for ~1k–5k steps typically reaches $L^2$ errors between `1e-2` and `1e-1` at `T=0.1`, depending on the RK scheme and batch sizes. Use `radau2` for stability and increase `N` and training `steps` for tighter accuracy.

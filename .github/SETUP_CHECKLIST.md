@@ -118,15 +118,17 @@ This checklist guides you through setting up all the professional components for
 
 ### Jupyter Notebooks
 
-- [ ] `examples/notebooks/visualization.ipynb` - TODO
-  - Interactive visualizations
-  - Solution evolution plots
-  - Error analysis
+- [x] `examples/notebooks/visualization.ipynb` - Created ✓
+  - Interactive visualizations (Plotly time slider)
+  - Solution evolution plots against the exact solution
+  - Space-time error analysis
+  - Committed with executed outputs; guarded by `tests/test_notebooks.py`
 
-- [ ] `examples/notebooks/benchmarking.ipynb` - TODO
-  - Performance profiling
+- [x] `examples/notebooks/benchmarking.ipynb` - Created ✓
+  - Performance profiling, forward and backward split
   - Memory usage analysis
-  - Scaling studies
+  - Scaling studies in slabs and spatial batch
+  - Accuracy per unit cost: measured convergence orders per tableau
 
 ## ✅ Phase 4: Documentation Website (LOWER PRIORITY)
 
