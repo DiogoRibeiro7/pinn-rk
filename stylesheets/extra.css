@@ -1,0 +1,21 @@
+/* Project-specific tweaks on top of the Material theme. */
+
+/* Convergence and benchmark tables carry a lot of numeric columns. Tabular figures keep
+   the digits aligned so orders of magnitude can be compared by eye. */
+.md-typeset table td,
+.md-typeset table th {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Wide tables should scroll inside their own container rather than forcing the page to
+   scroll sideways on narrow screens. */
+.md-typeset__table {
+  overflow-x: auto;
+}
+
+/* Display maths gets a little more breathing room than the theme default. */
+.md-typeset .arithmatex {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2rem 0;
+}
