@@ -260,8 +260,8 @@ _Tested on NVIDIA RTX 4090_
 ## Documentation
 
 - [Getting Started](getting-started/installation.md) - Installation and first steps
-- [Theory](theory/mathematical-background.md) - Mathematical background
-- [User Guide](guide/configuration.md) - Detailed usage
+- [Theory](theory/rk-pinn-formulation.md) - Mathematical background
+- [API Reference](api/config.md) - Detailed usage
 - [API Reference](api/config.md) - Complete API documentation
 - [Examples](examples/overview.md) - Practical examples
 
@@ -332,7 +332,7 @@ See [ROADMAP.md](roadmap.md) for detailed plans.
 
     Learn how to configure and train models
 
-    <a href="guide/configuration.md">:octicons-arrow-right-24: User Guide</a>
+    <a href="api/config.md">:octicons-arrow-right-24: API Reference</a>
 
 -   :material-code-braces:{ .lg .middle } <strong>API Reference</strong>
 

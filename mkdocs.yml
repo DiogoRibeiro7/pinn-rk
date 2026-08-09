@@ -86,6 +86,7 @@ plugins:
             show_submodules: false
   - git-revision-date-localized:
       enable_creation_date: true
+      enable_git_follow: false
       type: timeago
 
 nav:
@@ -93,16 +94,8 @@ nav:
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md
-    - Basic Concepts: getting-started/concepts.md
   - Theory:
-    - Mathematical Background: theory/mathematical-background.md
     - RK-PINN Formulation: theory/rk-pinn-formulation.md
-    - Boundary Conditions: theory/boundary-conditions.md
-  - User Guide:
-    - Configuration: guide/configuration.md
-    - Training Models: guide/training.md
-    - Custom Operators: guide/custom-operators.md
-    - Error Analysis: guide/error-analysis.md
   - API Reference:
     - Configuration: api/config.md
     - Butcher Tableaux: api/tableau.md
@@ -113,13 +106,26 @@ nav:
     - Loss Functions: api/loss.md
   - Examples:
     - Overview: examples/overview.md
-    - Heat Equation: examples/heat-equation.md
-    - Comparing Methods: examples/comparing-methods.md
-    - Custom PDEs: examples/custom-pde.md
   - Development:
     - Contributing: contributing.md
     - Roadmap: roadmap.md
     - Changelog: changelog.md
+
+# Pages under Development/ and Examples/ are pulled in from the repository root with
+# pymdownx.snippets. Their relative links (./ROADMAP.md, ../CITATION.cff) are correct on
+# GitHub but point outside the docs tree, so they cannot resolve here. Report rather than
+# fail on those, while keeping --strict meaningful for genuine problems such as a nav
+# entry with no page behind it.
+validation:
+  omitted_files: warn
+  links:
+    # Development/ and Examples/ pages are snippet includes of files that live at the
+    # repository root, where their relative links are correct. Those same links point
+    # outside the docs tree here and cannot resolve, so they are reported rather than
+    # fatal. Nav validation stays strict, so a nav entry with no page still fails.
+    not_found: info
+    absolute_links: info
+    unrecognized_links: info
 
 markdown_extensions:
   # Python Markdown
@@ -140,9 +146,11 @@ markdown_extensions:
       smart_enable: all
   - pymdownx.caret
   - pymdownx.details
+  # These must be Python object references, not quoted strings: Markdown calls them.
+  # As plain strings the build aborts with "TypeError: unsupported callable".
   - pymdownx.emoji:
-      emoji_index: "material.extensions.emoji.twemoji"
-      emoji_generator: "material.extensions.emoji.to_svg"
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -161,7 +169,9 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: ['.']
+      check_paths: true
 
 extra:
   social:
@@ -179,6 +189,7 @@ extra_css:
   - stylesheets/extra.css
 
 extra_javascript:
+  # polyfill.io was removed deliberately: the domain changed hands in 2024 and
+  # served malicious code. Modern browsers need no polyfill for MathJax 3.
   - javascripts/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
