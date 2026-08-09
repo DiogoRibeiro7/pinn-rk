@@ -6,7 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-- Nothing yet
+### Added
+
+- **Four-stage tableaux**: `butcher_gauss_legendre_q4` (classical order 8),
+  `butcher_radau_iia_q4` (order 7) and `butcher_lobatto_iiia_q4` (order 6).
+
+  Measured stage order now rises 1.9 → 2.9 → 3.9 across q=2, 3, 4. Since the stage
+  residual dominates the objective, that is the ceiling moving from O(k²) to O(k⁴).
+
+- `collocation_tableau(nodes)`, which derives a Butcher tableau from its nodes alone.
+  For a collocation method the coefficients are forced: `a_ij = ∫₀^{c_i} L_j`,
+  `b_j = ∫₀¹ L_j`. Gauss-Legendre, Radau IIA and Lobatto IIIA are all collocation
+  families, so this reconstructs any of them, and adding a new one now needs only its
+  nodes. Used internally for q=4, where the A matrices have no workable closed form and
+  writing out 16 coefficients apiece would be transcription risk with no benefit.
+
+- Tests covering the q=4 tableaux and the builder, including one asserting that Gauss
+  q=4's update residual **stalls at the float64 floor**. It is order 8, and
+  `(u_{n+1} - u_n)/k` carries rounding of about ε/k — roughly 2.6e-14 at k=1/120 — so
+  the true residual falls beneath it and refining the mesh stops helping. Pinning that
+  behaviour keeps the flat region from being read as a convergence failure.
+
+### Changed
+
+- `train_heat_equation` and `examples/04_convergence_study.py` accept the q=4 methods.
+- The order-condition tests distinguish hard-coded tableaux from derived ones. Comparing
+  a derived tableau against the derivation that produced it proves nothing, so for q=4
+  the verification rests on the order conditions instead — including a check that B(p+1)
+  *fails*, which pins the order from above as well as below.
 
 ## [0.4.0] - 2026-08-09
 

@@ -236,9 +236,16 @@ isolates truncation error. Measured by `tests/test_rk_order.py` and reproduced i
 | `lobatto3` | 3 | 2.92 | 3.91 | 4 |
 | `radau3` | 3 | 2.92 | 4.91 | 5 |
 | `gauss3` | 3 | 2.91 | 5.91 | 6 |
+| `lobatto4` | 4 | 3.88 | 5.85 | 6 |
+| `radau4` | 4 | 3.84 | 6.84 | 7 |
+| `gauss4` | 4 | 3.86 | not measurable | 8 |
 
 The **stage order** equals the number of stages and dominates the objective, so it is
-what caps accuracy. Moving to `q=3` lifts that ceiling from `O(k^2)` to `O(k^3)`.
+what caps accuracy: each added stage lifts the ceiling by one power of `k`.
+
+Gauss q=4 is order 8, which double precision cannot resolve here. The update residual
+is `(u_{n+1} - u_n)/k`, so rounding contributes about `eps/k` and the true value
+disappears beneath it; on coarse slabs the observed rate is about 7.7.
 
 This bounds what a perfectly trained network could achieve; it is **not** a trained-model
 convergence study. A rate table for trained L2 error against `N` needs several seeds and

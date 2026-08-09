@@ -26,10 +26,14 @@ from pinn_rk.tableau import (
     ButcherTableau,
     butcher_gauss_legendre_q2,
     butcher_gauss_legendre_q3,
+    butcher_gauss_legendre_q4,
     butcher_lobatto_iiia_q2,
     butcher_lobatto_iiia_q3,
+    butcher_lobatto_iiia_q4,
     butcher_radau_iia_q2,
     butcher_radau_iia_q3,
+    butcher_radau_iia_q4,
+    collocation_tableau,
 )
 
 # factory -> (stages q, classical order p, stiffly accurate)
@@ -40,8 +44,21 @@ TABLEAUX = {
     butcher_gauss_legendre_q3: (3, 6, False),
     butcher_radau_iia_q3: (3, 5, True),
     butcher_lobatto_iiia_q3: (3, 4, True),
+    butcher_gauss_legendre_q4: (4, 8, False),
+    butcher_radau_iia_q4: (4, 7, True),
+    butcher_lobatto_iiia_q4: (4, 6, True),
 }
 IDS = [f.__name__.replace("butcher_", "") for f in TABLEAUX]
+
+# The q=2 and q=3 tableaux carry hard-coded closed-form coefficients, so re-deriving them
+# from their nodes is a genuine independent check. The q=4 tableaux are *built* by
+# `collocation_tableau`, so that same comparison would only test the derivation against
+# itself. For those the verification weight is carried by the order conditions, which are
+# independent mathematical facts about the tableau rather than restatements of how it was
+# constructed -- in particular `test_classical_order_conditions`, which also asserts that
+# B(p+1) fails and therefore pins the order from above as well as below.
+HARDCODED = {f: v for f, v in TABLEAUX.items() if v[0] in (2, 3)}
+HARDCODED_IDS = [f.__name__.replace("butcher_", "") for f in HARDCODED]
 
 
 def _lagrange_integral(c: np.ndarray, j: int, upper: float) -> float:
@@ -67,13 +84,44 @@ def _numpy(t: ButcherTableau) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return t.A.numpy(), t.b.numpy(), t.c.numpy()
 
 
-@pytest.mark.parametrize("factory", TABLEAUX, ids=IDS)
+@pytest.mark.parametrize("factory", HARDCODED, ids=HARDCODED_IDS)
 def test_coefficients_match_the_collocation_derivation(factory) -> None:
-    """The hard-coded A and b must equal what the nodes force them to be."""
+    """
+    The hard-coded A and b must equal what the nodes force them to be.
+
+    Only the q=2 and q=3 tableaux are covered: the q=4 ones are produced by the very
+    derivation used here, so including them would compare the code to itself.
+    """
     A, b, c = _numpy(factory())
     A_derived, b_derived = _derive_from_nodes(c)
     assert np.max(np.abs(A - A_derived)) < 1e-14
     assert np.max(np.abs(b - b_derived)) < 1e-14
+
+
+def test_collocation_builder_reproduces_a_known_tableau() -> None:
+    """
+    `collocation_tableau` is checked against a tableau whose coefficients are known.
+
+    Nodes [0, 1/2, 1] must give Simpson's rule, b = [1/6, 2/3, 1/6], and the whole
+    Lobatto IIIA q=3 tableau. This is what makes the builder trustworthy for q=4, where
+    no closed form is available to compare against.
+    """
+    built = collocation_tableau([0.0, 0.5, 1.0])
+    known = butcher_lobatto_iiia_q3()
+    assert np.max(np.abs(built.A.numpy() - known.A.numpy())) < 1e-14
+    assert np.max(np.abs(built.b.numpy() - known.b.numpy())) < 1e-14
+    assert np.max(np.abs(built.c.numpy() - known.c.numpy())) < 1e-14
+
+
+def test_collocation_builder_rejects_duplicate_nodes() -> None:
+    """Repeated nodes make the Lagrange basis undefined; fail rather than divide by zero."""
+    with pytest.raises(ValueError, match="distinct"):
+        collocation_tableau([0.0, 0.5, 0.5])
+
+
+def test_collocation_builder_rejects_empty_input() -> None:
+    with pytest.raises(ValueError, match="non-empty"):
+        collocation_tableau([])
 
 
 @pytest.mark.parametrize("factory", TABLEAUX, ids=IDS)
@@ -139,18 +187,24 @@ def test_shapes_and_dtype(factory) -> None:
     assert t.A.dtype == torch.float64
 
 
-def test_three_stage_families_raise_the_stage_order() -> None:
+@pytest.mark.parametrize(
+    "family",
+    [
+        (butcher_gauss_legendre_q2, butcher_gauss_legendre_q3, butcher_gauss_legendre_q4),
+        (butcher_radau_iia_q2, butcher_radau_iia_q3, butcher_radau_iia_q4),
+        (butcher_lobatto_iiia_q2, butcher_lobatto_iiia_q3, butcher_lobatto_iiia_q4),
+    ],
+    ids=["gauss", "radau_iia", "lobatto_iiia"],
+)
+def test_stage_and_classical_order_rise_with_the_stage_count(family) -> None:
     """
-    The point of q=3: stage order rises from 2 to 3.
+    Within each family, both orders increase strictly with q.
 
-    The stage residual carries the stage order and dominates the RK objective, so this
-    is the lever that lifts the O(k^2) ceiling the two-stage tableaux impose.
+    Stage order is the one that matters here: it carries the stage residual, which
+    dominates the RK objective, so it -- not the classical order -- is what caps the
+    attainable accuracy. Each added stage lifts that ceiling by one power of k.
     """
-    for two, three in (
-        (butcher_gauss_legendre_q2, butcher_gauss_legendre_q3),
-        (butcher_radau_iia_q2, butcher_radau_iia_q3),
-        (butcher_lobatto_iiia_q2, butcher_lobatto_iiia_q3),
-    ):
-        assert TABLEAUX[two][0] == 2
-        assert TABLEAUX[three][0] == 3
-        assert TABLEAUX[three][1] > TABLEAUX[two][1]
+    stages = [TABLEAUX[f][0] for f in family]
+    orders = [TABLEAUX[f][1] for f in family]
+    assert stages == [2, 3, 4]
+    assert orders[0] < orders[1] < orders[2]

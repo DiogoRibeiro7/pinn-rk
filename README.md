@@ -104,6 +104,11 @@ This uses the **full** Butcher tableau — including the coupling matrix $A$ —
 | `lobatto3` | 3 | $2.92$ | $3.91$ | 4 |
 | `radau3` | 3 | $2.92$ | $4.91$ | 5 |
 | `gauss3` | 3 | $2.91$ | $5.91$ | 6 |
+| `lobatto4` | 4 | $3.88$ | $5.85$ | 6 |
+| `radau4` | 4 | $3.84$ | $6.84$ | 7 |
+| `gauss4` | 4 | $3.86$ | — | 8 |
+
+Gauss q=4 is order 8, which is past what double precision can measure here. The update residual is $(u_{n+1}-u_n)/k$, so rounding in $u$ contributes about $\epsilon/k$ — roughly $2.6\times10^{-14}$ at $k=1/120$ — and the true residual falls beneath it. On coarse slabs, where it is still visible, the observed rate is $\approx 7.7$; refining further makes the measured value stall rather than fall, which `tests/test_rk_order.py` asserts explicitly, so the flat region is not mistaken for a convergence failure.
 
 The update residual recovers each method's **classical order**, which is what makes the choice of tableau meaningful: Gauss and Radau cost the same stages, and Gauss is orders of magnitude more consistent at the same slab size.
 
@@ -219,6 +224,9 @@ Tableaux with the same stage count cost the same per slab, so within a row of th
 | `lobatto3` | 3 | 4 | A‑stable | Simpson's rule; stiffly accurate |
 | `radau3` | 3 | **5** | **L‑stable** | robust default when stiff |
 | `gauss3` | 3 | **6** | A‑stable | most accurate per stage; symplectic |
+| `lobatto4` | 4 | 6 | A‑stable | stiffly accurate |
+| `radau4` | 4 | **7** | **L‑stable** | highest order with L‑stability |
+| `gauss4` | 4 | **8** | A‑stable | highest order shipped; symplectic |
 
 Prefer Gauss for accuracy on smooth problems and Radau IIA when the operator is stiff — A‑stability alone does not damp the stiffest modes, which is why Radau IIA remains the robust choice despite the lower order.
 
@@ -230,7 +238,7 @@ Switch via the `method` argument in `train_heat_equation`.
 
 ## Extending the library
 
-1. **Add RK variants.** Implement additional `ButcherTableau` factories (e.g., Gauss q=3, Radau IIA q=3). No other code changes required.
+1. **Add RK variants.** Pass the nodes to `collocation_tableau(c)` and it derives `A` and `b` for you — for a collocation method they are forced by the nodes. Gauss, Radau IIA and Lobatto IIIA ship at q=2, 3 and 4. No other code changes required.
 2. **New PDE operators.** Create a class implementing the `EllipticOperator` protocol and supply it to `RkPinnLoss`.
 3. **Initial/boundary data.** Replace `init_data` and/or change the boundary factor $\Phi$ for different domains/BCs.
 4. **Right‑hand side.** Provide a custom `f_rhs(x,t)` callable.

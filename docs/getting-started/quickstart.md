@@ -84,6 +84,9 @@ free. Under `residual="rk"` the classical order is what you actually get:
 | `lobatto3` | 3 | 4 | A-stable, stiffly accurate |
 | `radau3` | 3 | 5 | **L-stable** |
 | `gauss3` | 3 | 6 | A-stable, symplectic |
+| `lobatto4` | 4 | 6 | A-stable, stiffly accurate |
+| `radau4` | 4 | 7 | **L-stable** |
+| `gauss4` | 4 | 8 | A-stable, symplectic |
 
 Prefer Gauss for accuracy on smooth problems and Radau IIA when the operator is stiff:
 A-stability alone does not damp the stiffest modes, which is why Radau remains the robust
@@ -91,8 +94,9 @@ default despite the lower order.
 
 !!! note "Stage order is the real ceiling"
     The stage residual converges at the **stage order**, which equals the number of
-    stages, and it dominates the objective. So `q=3` improves matters more than the
-    classical order alone suggests: it lifts the ceiling from `O(k^2)` to `O(k^3)`.
+    stages, and it dominates the objective. So raising `q` improves matters more than
+    the classical order alone suggests: each added stage lifts the ceiling by one power
+    of `k`, reaching `O(k^4)` at `q=4`.
 
 ## Verifying, not guessing
 

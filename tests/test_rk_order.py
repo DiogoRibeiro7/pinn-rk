@@ -31,10 +31,13 @@ from pinn_rk.operators import Laplacian1D
 from pinn_rk.tableau import (
     butcher_gauss_legendre_q2,
     butcher_gauss_legendre_q3,
+    butcher_gauss_legendre_q4,
     butcher_lobatto_iiia_q2,
     butcher_lobatto_iiia_q3,
+    butcher_lobatto_iiia_q4,
     butcher_radau_iia_q2,
     butcher_radau_iia_q3,
+    butcher_radau_iia_q4,
 )
 
 DEV = torch.device("cpu")
@@ -85,15 +88,35 @@ KS = [0.1 / n for n in NS]
 # measures order where the terms are still above noise, which is the honest window.
 NS_Q3 = [3, 5, 8, 12]
 KS_Q3 = [0.1 / n for n in NS_Q3]
+NS_Q4 = [2, 3, 4, 6]
+KS_Q4 = [0.1 / n for n in NS_Q4]
 
-# tableau -> (stages q, classical order p, refinement)
+# Gauss q=4 is order 8, which float64 cannot resolve here. The update residual is
+# (u_{n+1} - u_n)/k, so rounding in u contributes about eps/k: roughly 2.6e-14 at
+# k = 1/120. The true residual falls below that by N = 6, where the measured rate
+# collapses to zero -- not because the method stops converging, but because there is
+# nothing left to measure. Its order is therefore measured on coarser slabs, where
+# convergence is still pre-asymptotic and the observed rate sits near 7.7 rather than 8.
+NS_GAUSS4_UPDATE = [1, 2, 3]
+KS_GAUSS4_UPDATE = [0.1 / n for n in NS_GAUSS4_UPDATE]
+
+# tableau -> (stages q, classical order p, stage refinement, update refinement, tolerance)
 CASES = {
-    butcher_gauss_legendre_q2: (2, 4, NS, KS),
-    butcher_radau_iia_q2: (2, 3, NS, KS),
-    butcher_lobatto_iiia_q2: (2, 2, NS, KS),
-    butcher_gauss_legendre_q3: (3, 6, NS_Q3, KS_Q3),
-    butcher_radau_iia_q3: (3, 5, NS_Q3, KS_Q3),
-    butcher_lobatto_iiia_q3: (3, 4, NS_Q3, KS_Q3),
+    butcher_gauss_legendre_q2: (2, 4, (NS, KS), (NS, KS), 0.3),
+    butcher_radau_iia_q2: (2, 3, (NS, KS), (NS, KS), 0.3),
+    butcher_lobatto_iiia_q2: (2, 2, (NS, KS), (NS, KS), 0.3),
+    butcher_gauss_legendre_q3: (3, 6, (NS_Q3, KS_Q3), (NS_Q3, KS_Q3), 0.3),
+    butcher_radau_iia_q3: (3, 5, (NS_Q3, KS_Q3), (NS_Q3, KS_Q3), 0.3),
+    butcher_lobatto_iiia_q3: (3, 4, (NS_Q3, KS_Q3), (NS_Q3, KS_Q3), 0.3),
+    butcher_gauss_legendre_q4: (
+        4,
+        8,
+        (NS_Q4, KS_Q4),
+        (NS_GAUSS4_UPDATE, KS_GAUSS4_UPDATE),
+        0.5,
+    ),
+    butcher_radau_iia_q4: (4, 7, (NS_Q4, KS_Q4), (NS_Q4, KS_Q4), 0.35),
+    butcher_lobatto_iiia_q4: (4, 6, (NS_Q4, KS_Q4), (NS_Q4, KS_Q4), 0.35),
 }
 IDS = [f.__name__.replace("butcher_", "") for f in CASES]
 
@@ -106,22 +129,41 @@ def test_stage_residual_converges_at_the_stage_order(tab_fn) -> None:
     This is the number that matters most: the stage residual dominates the "rk"
     objective, so it -- not the classical order -- sets the accuracy ceiling.
     """
-    q, _, ns, ks = CASES[tab_fn]
+    q, _, (ns, ks), _, tol = CASES[tab_fn]
     errs = [_residual_norms(tab_fn, n)[0] for n in ns]
-    assert _order(errs, ks) == pytest.approx(float(q), abs=0.25)
+    assert _order(errs, ks) == pytest.approx(float(q), abs=tol)
 
 
 @pytest.mark.parametrize("tab_fn", CASES, ids=IDS)
 def test_update_residual_has_the_tableau_classical_order(tab_fn) -> None:
     """
-    The update residual converges at the tableau's classical order: 4, 3, 2, 6, 5, 4.
+    The update residual converges at the tableau's classical order.
 
-    This is the property that makes the choice of tableau matter. It is only
-    reachable because the residual uses the Butcher matrix A.
+    Across the nine shipped tableaux that is 2, 3, 4, 4, 5, 6, 6, 7 and 8. This is the
+    property that makes the choice of tableau matter, and it is only reachable because
+    the residual uses the Butcher matrix A.
     """
-    _, p, ns, ks = CASES[tab_fn]
+    _, p, _, (ns, ks), tol = CASES[tab_fn]
     errs = [_residual_norms(tab_fn, n)[1] for n in ns]
-    assert _order(errs, ks) == pytest.approx(float(p), abs=0.3)
+    assert _order(errs, ks) == pytest.approx(float(p), abs=tol)
+
+
+def test_gauss4_update_residual_reaches_the_float64_floor() -> None:
+    """
+    Gauss q=4 converges past what double precision can represent.
+
+    The update residual is (u_{n+1} - u_n)/k, so rounding in u contributes about eps/k.
+    By N = 8 the true residual is below that, and refining further stops helping: the
+    value stalls instead of falling. Documenting it as a test keeps the flat region from
+    being mistaken for a convergence failure.
+    """
+    at_8 = _residual_norms(butcher_gauss_legendre_q4, 8)[1]
+    at_12 = _residual_norms(butcher_gauss_legendre_q4, 12)[1]
+
+    assert at_8 < 1e-13, "should already be at the floor by N=8"
+    # Refining 1.5x would cut an order-8 residual by ~25x; instead it barely moves.
+    assert at_12 > at_8 / 2.0, "residual still falling, so the floor was not reached"
+    assert at_12 < 1e-13
 
 
 def test_gauss_update_residual_is_far_below_radau_at_equal_cost() -> None:
@@ -137,27 +179,26 @@ def test_gauss_update_residual_is_far_below_radau_at_equal_cost() -> None:
 
 
 @pytest.mark.parametrize(
-    ("two_stage", "three_stage"),
+    "family",
     [
-        (butcher_gauss_legendre_q2, butcher_gauss_legendre_q3),
-        (butcher_radau_iia_q2, butcher_radau_iia_q3),
-        (butcher_lobatto_iiia_q2, butcher_lobatto_iiia_q3),
+        (butcher_gauss_legendre_q2, butcher_gauss_legendre_q3, butcher_gauss_legendre_q4),
+        (butcher_radau_iia_q2, butcher_radau_iia_q3, butcher_radau_iia_q4),
+        (butcher_lobatto_iiia_q2, butcher_lobatto_iiia_q3, butcher_lobatto_iiia_q4),
     ],
     ids=["gauss", "radau_iia", "lobatto_iiia"],
 )
-def test_three_stages_lift_the_stage_order_ceiling(two_stage, three_stage) -> None:
+def test_each_added_stage_lifts_the_ceiling(family) -> None:
     """
-    Going from q=2 to q=3 raises the stage order from 2 to 3.
+    Stage order tracks the stage count: 2, then 3, then 4.
 
     The stage residual caps the accuracy of the whole objective, so this is the lever
-    that lifts the O(k^2) ceiling the two-stage tableaux impose -- and it is why
-    higher-order tableaux are worth having at all.
+    that lifts the ceiling -- and the reason higher-order tableaux are worth having.
+    Measured on one shared refinement so the three are directly comparable.
     """
-    order_2 = _order([_residual_norms(two_stage, n)[0] for n in NS_Q3], KS_Q3)
-    order_3 = _order([_residual_norms(three_stage, n)[0] for n in NS_Q3], KS_Q3)
-    assert order_2 == pytest.approx(2.0, abs=0.3)
-    assert order_3 == pytest.approx(3.0, abs=0.3)
-    assert order_3 > order_2 + 0.5
+    orders = [_order([_residual_norms(f, n)[0] for n in NS_Q4], KS_Q4) for f in family]
+    for observed, expected in zip(orders, (2.0, 3.0, 4.0), strict=True):
+        assert observed == pytest.approx(expected, abs=0.35)
+    assert orders[0] < orders[1] < orders[2]
 
 
 def test_lobatto_is_stiffly_accurate() -> None:
