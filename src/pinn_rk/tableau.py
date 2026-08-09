@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Final
 
 import numpy as np
+import numpy.typing as npt
 import torch
 from torch import Tensor
 
@@ -28,7 +29,7 @@ class ButcherTableau:
             raise ValueError("Runge–Kutta nodes c must lie in [0,1].")
 
 
-def _lagrange_integral(c: np.ndarray, j: int, upper: float) -> float:
+def _lagrange_integral(c: npt.NDArray[np.float64], j: int, upper: float) -> float:
     """∫_0^upper L_j(s) ds, by exact integration of the Lagrange basis polynomial."""
     poly = np.poly1d([1.0])
     denom = 1.0
