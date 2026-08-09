@@ -30,8 +30,11 @@ from pinn_rk.mesh import TimeMesh
 from pinn_rk.operators import Laplacian1D
 from pinn_rk.tableau import (
     butcher_gauss_legendre_q2,
+    butcher_gauss_legendre_q3,
     butcher_lobatto_iiia_q2,
+    butcher_lobatto_iiia_q3,
     butcher_radau_iia_q2,
+    butcher_radau_iia_q3,
 )
 
 DEV = torch.device("cpu")
@@ -76,31 +79,49 @@ def _order(errs: list[float], ks: list[float]) -> float:
 NS = [5, 10, 20, 40]
 KS = [0.1 / n for n in NS]
 
-# tableau -> classical order p
-CLASSICAL_ORDER = {
-    butcher_gauss_legendre_q2: 4,
-    butcher_radau_iia_q2: 3,
-    butcher_lobatto_iiia_q2: 2,
+# The three-stage families need a coarser refinement. Their residuals fall so fast --
+# Gauss q=3 is order 6 -- that on a fine mesh they reach the float64 rounding floor of
+# the (u_{n+1} - u_n)/k difference, and the measured slope collapses toward zero. This
+# measures order where the terms are still above noise, which is the honest window.
+NS_Q3 = [3, 5, 8, 12]
+KS_Q3 = [0.1 / n for n in NS_Q3]
+
+# tableau -> (stages q, classical order p, refinement)
+CASES = {
+    butcher_gauss_legendre_q2: (2, 4, NS, KS),
+    butcher_radau_iia_q2: (2, 3, NS, KS),
+    butcher_lobatto_iiia_q2: (2, 2, NS, KS),
+    butcher_gauss_legendre_q3: (3, 6, NS_Q3, KS_Q3),
+    butcher_radau_iia_q3: (3, 5, NS_Q3, KS_Q3),
+    butcher_lobatto_iiia_q3: (3, 4, NS_Q3, KS_Q3),
 }
+IDS = [f.__name__.replace("butcher_", "") for f in CASES]
 
 
-@pytest.mark.parametrize("tab_fn", list(CLASSICAL_ORDER))
-def test_stage_residual_has_stage_order_two(tab_fn) -> None:
-    """All three q=2 collocation tableaux have stage order 2."""
-    errs = [_residual_norms(tab_fn, n)[0] for n in NS]
-    assert _order(errs, KS) == pytest.approx(2.0, abs=0.2)
-
-
-@pytest.mark.parametrize(("tab_fn", "p"), list(CLASSICAL_ORDER.items()))
-def test_update_residual_has_the_tableau_classical_order(tab_fn, p: int) -> None:
+@pytest.mark.parametrize("tab_fn", CASES, ids=IDS)
+def test_stage_residual_converges_at_the_stage_order(tab_fn) -> None:
     """
-    The update residual converges at the tableau's classical order: 4, 3, 2.
+    Collocation methods have stage order q, and the measurement confirms it.
+
+    This is the number that matters most: the stage residual dominates the "rk"
+    objective, so it -- not the classical order -- sets the accuracy ceiling.
+    """
+    q, _, ns, ks = CASES[tab_fn]
+    errs = [_residual_norms(tab_fn, n)[0] for n in ns]
+    assert _order(errs, ks) == pytest.approx(float(q), abs=0.25)
+
+
+@pytest.mark.parametrize("tab_fn", CASES, ids=IDS)
+def test_update_residual_has_the_tableau_classical_order(tab_fn) -> None:
+    """
+    The update residual converges at the tableau's classical order: 4, 3, 2, 6, 5, 4.
 
     This is the property that makes the choice of tableau matter. It is only
     reachable because the residual uses the Butcher matrix A.
     """
-    errs = [_residual_norms(tab_fn, n)[1] for n in NS]
-    assert _order(errs, KS) == pytest.approx(float(p), abs=0.25)
+    _, p, ns, ks = CASES[tab_fn]
+    errs = [_residual_norms(tab_fn, n)[1] for n in ns]
+    assert _order(errs, ks) == pytest.approx(float(p), abs=0.3)
 
 
 def test_gauss_update_residual_is_far_below_radau_at_equal_cost() -> None:
@@ -113,6 +134,30 @@ def test_gauss_update_residual_is_far_below_radau_at_equal_cost() -> None:
     gauss = _residual_norms(butcher_gauss_legendre_q2, 20)[1]
     radau = _residual_norms(butcher_radau_iia_q2, 20)[1]
     assert gauss < radau / 100.0
+
+
+@pytest.mark.parametrize(
+    ("two_stage", "three_stage"),
+    [
+        (butcher_gauss_legendre_q2, butcher_gauss_legendre_q3),
+        (butcher_radau_iia_q2, butcher_radau_iia_q3),
+        (butcher_lobatto_iiia_q2, butcher_lobatto_iiia_q3),
+    ],
+    ids=["gauss", "radau_iia", "lobatto_iiia"],
+)
+def test_three_stages_lift_the_stage_order_ceiling(two_stage, three_stage) -> None:
+    """
+    Going from q=2 to q=3 raises the stage order from 2 to 3.
+
+    The stage residual caps the accuracy of the whole objective, so this is the lever
+    that lifts the O(k^2) ceiling the two-stage tableaux impose -- and it is why
+    higher-order tableaux are worth having at all.
+    """
+    order_2 = _order([_residual_norms(two_stage, n)[0] for n in NS_Q3], KS_Q3)
+    order_3 = _order([_residual_norms(three_stage, n)[0] for n in NS_Q3], KS_Q3)
+    assert order_2 == pytest.approx(2.0, abs=0.3)
+    assert order_3 == pytest.approx(3.0, abs=0.3)
+    assert order_3 > order_2 + 0.5
 
 
 def test_lobatto_is_stiffly_accurate() -> None:

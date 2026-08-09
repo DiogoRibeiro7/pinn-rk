@@ -39,11 +39,52 @@ python examples/02_different_rk_methods.py
 
 --------------------------------------------------------------------------------
 
-> **Not yet written.** `03_custom_operator.py` (a custom `EllipticOperator` for
-> reaction-diffusion) and `04_convergence_study.py` (a sweep over `N` with rate
-> estimates) are planned but do not exist yet — see [ROADMAP.md](../ROADMAP.md).
-> The convergence behaviour they would show is measured today in
-> `notebooks/benchmarking.ipynb` and pinned by `tests/test_rk_order.py`.
+### 3\. Custom Operator (`03_custom_operator.py`)
+
+Implement a custom PDE operator for a reaction-diffusion equation.
+
+```bash
+python examples/03_custom_operator.py
+```
+
+**What it demonstrates:**
+
+- Implementing the `EllipticOperator` protocol
+- Adding a reaction term: `L u = -D u_xx + k u`
+- A **non-zero** right-hand side, derived from a manufactured solution
+- Validating the operator against its closed form *before* training on it
+
+That last point is the one worth copying. A miswritten operator produces a PINN that
+trains happily to the wrong answer, and that is expensive to diagnose later; comparing
+`L u` to its analytic value takes microseconds and catches sign and factor errors
+immediately.
+
+**Expected runtime:** ~2-3 minutes on CPU
+
+--------------------------------------------------------------------------------
+
+### 4\. Convergence Study (`04_convergence_study.py`)
+
+Sweep over the number of time slabs and measure observed convergence rates.
+
+```bash
+python examples/04_convergence_study.py                        # consistency only, seconds
+python examples/04_convergence_study.py --train                # adds training, minutes
+python examples/04_convergence_study.py --save-plots --export-csv results.csv
+```
+
+**What it demonstrates:**
+
+- Sweeping over `N` and fitting log-log rates
+- Keeping **consistency error** and **trained L2 error** apart — they measure different
+  things and need not agree
+- Plot generation and CSV export
+
+Consistency error is deterministic and isolates the time discretisation; trained error is
+stochastic and optimisation-limited. Reporting only the first would overstate the method;
+reporting only the second would hide where the error comes from.
+
+**Expected runtime:** seconds without `--train`, ~10-15 minutes with it
 
 --------------------------------------------------------------------------------
 
@@ -126,10 +167,11 @@ python examples/01_basic_heat_equation.py --save-model ./model.pth
 
 # Full flag list for any example
 python examples/01_basic_heat_equation.py --help
-```
 
-Plot and CSV export were previously documented here for `04_convergence_study.py`, which
-does not exist. Use `notebooks/benchmarking.ipynb` for convergence data in the meantime.
+# Convergence plots and CSV export
+python examples/04_convergence_study.py --save-plots --output-dir ./results
+python examples/04_convergence_study.py --export-csv ./data.csv
+```
 
 --------------------------------------------------------------------------------
 
@@ -186,16 +228,22 @@ These are **consistency** orders: the residual left on the exact solution, which
 isolates truncation error. Measured by `tests/test_rk_order.py` and reproduced in
 `notebooks/benchmarking.ipynb`:
 
-| tableau | update residual at k=5e-3 | measured order | classical order |
-| --- | --- | --- | --- |
-| `gauss2` | 1.3e-08 | 3.97 | 4 |
-| `radau2` | 5.3e-06 | 2.97 | 3 |
-| `lobatto2` | 2.0e-03 | 1.97 | 2 |
+| tableau | stages | stage order | update order | classical order |
+| --- | --- | --- | --- | --- |
+| `lobatto2` | 2 | 1.91 | 1.91 | 2 |
+| `radau2` | 2 | 1.92 | 2.91 | 3 |
+| `gauss2` | 2 | 1.94 | 3.91 | 4 |
+| `lobatto3` | 3 | 2.92 | 3.91 | 4 |
+| `radau3` | 3 | 2.92 | 4.91 | 5 |
+| `gauss3` | 3 | 2.91 | 5.91 | 6 |
+
+The **stage order** equals the number of stages and dominates the objective, so it is
+what caps accuracy. Moving to `q=3` lifts that ceiling from `O(k^2)` to `O(k^3)`.
 
 This bounds what a perfectly trained network could achieve; it is **not** a trained-model
-convergence study. A rate table for trained L2 error against `N` would need several
-seeds and converged runs, which is exactly what `04_convergence_study.py` is meant to
-provide once written.
+convergence study. A rate table for trained L2 error against `N` needs several seeds and
+converged runs; `04_convergence_study.py --train` produces one, and prints a reminder
+that a single seed cannot establish a trend.
 
 --------------------------------------------------------------------------------
 

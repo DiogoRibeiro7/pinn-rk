@@ -13,9 +13,23 @@ from pinn_rk import (
     RkPinnLoss,
     TimeMesh,
     butcher_gauss_legendre_q2,
+    butcher_gauss_legendre_q3,
     butcher_lobatto_iiia_q2,
+    butcher_lobatto_iiia_q3,
     butcher_radau_iia_q2,
+    butcher_radau_iia_q3,
 )
+
+Method = Literal["gauss2", "radau2", "lobatto2", "gauss3", "radau3", "lobatto3"]
+
+TABLEAUX = {
+    "gauss2": butcher_gauss_legendre_q2,
+    "radau2": butcher_radau_iia_q2,
+    "lobatto2": butcher_lobatto_iiia_q2,
+    "gauss3": butcher_gauss_legendre_q3,
+    "radau3": butcher_radau_iia_q3,
+    "lobatto3": butcher_lobatto_iiia_q3,
+}
 
 # --- Exact manufactured solution for validation ---
 
@@ -38,7 +52,7 @@ def make_init_data(n0: int, device: torch.device) -> tuple[Tensor, Tensor]:
 
 
 def train_heat_equation(
-    method: Literal["gauss2", "radau2", "lobatto2"] = "radau2",
+    method: Method = "radau2",
     T: float = 0.1,
     N: int = 20,
     n_x_train: int = 256,
@@ -49,14 +63,9 @@ def train_heat_equation(
 ) -> nn.Module:
     torch.set_default_dtype(torch.float64)
 
-    if method == "gauss2":
-        bt = butcher_gauss_legendre_q2(device)
-    elif method == "radau2":
-        bt = butcher_radau_iia_q2(device)
-    elif method == "lobatto2":
-        bt = butcher_lobatto_iiia_q2(device)
-    else:
-        raise ValueError("Unknown RK method.")
+    if method not in TABLEAUX:
+        raise ValueError(f"Unknown RK method {method!r}; expected one of {sorted(TABLEAUX)}.")
+    bt = TABLEAUX[method](device)
 
     mesh = TimeMesh.uniform(T=T, N=N, device=device)
     model = MLP(in_dim=2, width=128, depth=4, activation="tanh", dtype=torch.float64).to(device)

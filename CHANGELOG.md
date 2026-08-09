@@ -8,6 +8,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- **Three-stage tableaux**: `butcher_gauss_legendre_q3` (classical order 6),
+  `butcher_radau_iia_q3` (order 5) and `butcher_lobatto_iiia_q3` (order 4), exported from
+  the package root and selectable through `train_heat_equation(method=...)`.
+
+  These lift the accuracy ceiling. The stage residual converges at the *stage order*,
+  which for collocation methods equals the stage count, and it dominates the objective —
+  so the two-stage families capped the whole scheme at O(k²) regardless of their
+  classical order. Measured stage order rises from 1.91-1.94 to 2.91-2.92, and Gauss's
+  stage residual falls by roughly 190x at the same slab size.
+
+- `tests/test_tableau_order.py`, verifying every shipped tableau algebraically. All three
+  families are collocation methods, so A and b are forced by the nodes; the test
+  re-derives them by integrating the Lagrange basis and compares, then checks the order
+  conditions B(p) and C(q), the row sums, stiff accuracy, and node distinctness. A
+  mistyped coefficient fails here rather than silently degrading the method.
+
+- `examples/03_custom_operator.py` — a reaction-diffusion operator implementing
+  `EllipticOperator`, with a non-zero right-hand side from a manufactured solution, and a
+  validation step that checks the operator against its closed form before training.
+
+- `examples/04_convergence_study.py` — sweeps `N`, fits log-log rates, and reports
+  consistency error and trained L2 error side by side while keeping them clearly
+  distinct. Supports `--train`, `--save-plots`, `--output-dir` and `--export-csv`, the
+  flags the examples README had long documented without them existing.
+
+- A documentation site that actually builds: API reference pages generated with
+  mkdocstrings, an installation guide, a quick start, and a page deriving the RK-PINN
+  formulation. `docs/javascripts/mathjax.js` was missing, so no LaTeX in the docs would
+  have rendered.
+
 - `examples/notebooks/visualization.ipynb` — training history shown with its stochastic
   noise rather than smoothed, solution evolution against the exact solution, a
   space-time error heat map, an interactive Plotly time slider, and a same-seed
@@ -32,7 +62,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   invented — a suspiciously smooth 0.91/0.92/0.92 — and are now the measured
   consistency orders, labelled as such rather than implied to be trained-model results.
 - The documented `--save-plots`, `--output-dir` and `--export-csv` flags belonged to a
-  script that does not exist. Only flags the examples actually accept are shown.
+  script that did not exist. `04_convergence_study.py` now implements them.
+- `mkdocs build` failed outright: `pymdownx.emoji` was configured with quoted strings
+  where Markdown calls the values, aborting with `TypeError: unsupported callable`. The
+  nav also listed 24 pages of which only one existed. Both fixed, so the site builds
+  under `--strict`.
+- `mkdocs.yml` loaded `polyfill.io`, a domain that changed hands in 2024 and served
+  malicious code. Removed; MathJax 3 needs no polyfill in supported browsers.
+- `docs/index.md` linked to two pages that were never written.
+- `.coverage`, a binary SQLite artifact, was tracked in git. Untracked; it was already
+  listed in `.gitignore`.
 
 ## [0.3.0] - 2026-08-08
 

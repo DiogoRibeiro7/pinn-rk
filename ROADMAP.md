@@ -29,9 +29,10 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Goal:** Expand RK methods and core numerics.
 
-* [ ] **Higher‑order RK**: Gauss, Radau IIA, Lobatto for q=3,4. Now worth more than
-  before: since the residual uses the Butcher matrix `A`, the update equation
-  converges at the tableau's classical order, so raising q raises the order.
+* [x] **Higher‑order RK**: Gauss, Radau IIA and Lobatto IIIA for q=3 — classical
+  orders 6, 5 and 4. This lifts the accuracy ceiling, because the stage residual
+  converges at the stage order (= stage count) and dominates the objective:
+  measured stage order rises from ~1.9 to ~2.9. q=4 remains open.
 * [x] **Analytic time derivative** of the Lagrange interpolant (\hat u_t) (replace finite‑diff)
   — done in v0.2.0, and retained as `residual="interpolant"`.
 * [x] **Full Butcher tableau in the residual** — the stage equations bring `A` into

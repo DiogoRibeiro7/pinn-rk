@@ -96,13 +96,18 @@ $$
 
 This uses the **full** Butcher tableau — including the coupling matrix $A$ — so the scheme inherits the tableau's own accuracy. Feeding the manufactured solution $u = \sin(\pi x)e^{-\pi^2 t}$ through the residual leaves only local truncation error:
 
-| tableau | $r_{\text{step}}$ at $k=5\times10^{-3}$ | observed order | classical order $p$ |
-| --- | --- | --- | --- |
-| `gauss2` | $1.3\times10^{-8}$ | $3.96$ | 4 |
-| `radau2` | $5.3\times10^{-6}$ | $2.96$ | 3 |
-| `lobatto2` | $2.0\times10^{-3}$ | $1.96$ | 2 |
+| tableau | stages | stage order | update order | classical $p$ |
+| --- | --- | --- | --- | --- |
+| `lobatto2` | 2 | $1.91$ | $1.91$ | 2 |
+| `radau2` | 2 | $1.92$ | $2.91$ | 3 |
+| `gauss2` | 2 | $1.94$ | $3.91$ | 4 |
+| `lobatto3` | 3 | $2.92$ | $3.91$ | 4 |
+| `radau3` | 3 | $2.92$ | $4.91$ | 5 |
+| `gauss3` | 3 | $2.91$ | $5.91$ | 6 |
 
-The stage residual converges at the **stage order** ($2$ for all three q=2 collocation tableaux); the update residual recovers each method's **classical order**. This is what makes the choice of tableau meaningful: Gauss and Radau cost the same two stages, and Gauss is two orders of magnitude more consistent at the same slab size. Orders are pinned by `tests/test_rk_order.py`.
+The update residual recovers each method's **classical order**, which is what makes the choice of tableau meaningful: Gauss and Radau cost the same stages, and Gauss is orders of magnitude more consistent at the same slab size.
+
+The stage residual converges at the **stage order**, which for collocation methods equals the number of stages $q$. Since the objective sums both, **the stage order sets the ceiling** — which is why moving from $q=2$ to $q=3$ matters more than the classical orders alone suggest: it lifts that ceiling from $\mathcal{O}(k^2)$ to $\mathcal{O}(k^3)$. Orders are pinned by `tests/test_rk_order.py`, and the tableaux themselves are re-derived from their nodes and checked against the order conditions in `tests/test_tableau_order.py`.
 
 Lobatto IIIA is *stiffly accurate* — its $b$ equals the last row of $A$ — so its update and final stage residuals coincide exactly.
 
@@ -204,15 +209,20 @@ $\partial_t\hat{u}$ at the stage nodes is `D @ U`, taken analytically from the i
 
 ## Choosing the RK scheme
 
-All three are 2‑stage, so they cost the same per slab. Under `residual="rk"` they differ in accuracy, and the trade‑off is the classical one between order and stability:
+Tableaux with the same stage count cost the same per slab, so within a row of this table accuracy is close to free. Under `residual="rk"` the trade‑off is the classical one between order and stability:
 
-| scheme | classical order | stability | notes |
-| --- | --- | --- | --- |
-| `gauss2` (Gauss–Legendre) | **4** | A‑stable | most accurate per stage; symplectic |
-| `radau2` (Radau IIA) | **3** | **L‑stable** | damps stiff transients; safest default |
-| `lobatto2` (Lobatto IIIA) | **2** | A‑stable | trapezoidal rule; symmetric, stiffly accurate |
+| scheme | stages | classical order | stability | notes |
+| --- | --- | --- | --- | --- |
+| `lobatto2` (Lobatto IIIA) | 2 | 2 | A‑stable | trapezoidal rule; symmetric, stiffly accurate |
+| `radau2` (Radau IIA) | 2 | **3** | **L‑stable** | damps stiff transients |
+| `gauss2` (Gauss–Legendre) | 2 | **4** | A‑stable | most accurate per stage; symplectic |
+| `lobatto3` | 3 | 4 | A‑stable | Simpson's rule; stiffly accurate |
+| `radau3` | 3 | **5** | **L‑stable** | robust default when stiff |
+| `gauss3` | 3 | **6** | A‑stable | most accurate per stage; symplectic |
 
-Prefer `gauss2` for accuracy on smooth problems and `radau2` when the operator is stiff — A‑stability alone does not damp the stiffest modes, which is why Radau IIA remains the robust choice despite the lower order.
+Prefer Gauss for accuracy on smooth problems and Radau IIA when the operator is stiff — A‑stability alone does not damp the stiffest modes, which is why Radau IIA remains the robust choice despite the lower order.
+
+Because the **stage order** equals the stage count and caps the objective, moving from `q=2` to `q=3` raises the ceiling for every family, not just the classical order.
 
 Switch via the `method` argument in `train_heat_equation`.
 
