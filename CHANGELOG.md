@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Nothing yet
+
+## [0.5.0] - 2026-08-09
+
+Completes the higher-order roadmap item with four-stage tableaux, and adds a builder
+that constructs any collocation family from its nodes alone.
+
 ### Added
 
 - **Four-stage tableaux**: `butcher_gauss_legendre_q4` (classical order 8),
@@ -393,4 +400,5 @@ When making changes:
 [0.2.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.3.0...v0.4.0
-[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.4.0...HEAD
+[0.5.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.4.0...v0.5.0
+[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.0...HEAD
