@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Nothing yet
+
+## [0.4.0] - 2026-08-09
+
+Raises the accuracy ceiling with three-stage tableaux, fills in the two example scripts
+that had been documented but never written, and gets the documentation site building and
+deployed for the first time.
+
 ### Added
 
 - **Three-stage tableaux**: `butcher_gauss_legendre_q3` (classical order 6),
@@ -357,4 +365,5 @@ When making changes:
 [0.1.0]: https://github.com/DiogoRibeiro7/pinn-rk/releases/tag/v0.1.0
 [0.2.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.2.0...v0.3.0
-[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.3.0...HEAD
+[0.4.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.3.0...v0.4.0
+[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.4.0...HEAD
