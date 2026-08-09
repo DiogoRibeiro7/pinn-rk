@@ -13,10 +13,14 @@ from .operators import Laplacian1D as Laplacian1D
 from .tableau import ButcherTableau as ButcherTableau
 from .tableau import butcher_gauss_legendre_q2 as butcher_gauss_legendre_q2
 from .tableau import butcher_gauss_legendre_q3 as butcher_gauss_legendre_q3
+from .tableau import butcher_gauss_legendre_q4 as butcher_gauss_legendre_q4
 from .tableau import butcher_lobatto_iiia_q2 as butcher_lobatto_iiia_q2
 from .tableau import butcher_lobatto_iiia_q3 as butcher_lobatto_iiia_q3
+from .tableau import butcher_lobatto_iiia_q4 as butcher_lobatto_iiia_q4
 from .tableau import butcher_radau_iia_q2 as butcher_radau_iia_q2
 from .tableau import butcher_radau_iia_q3 as butcher_radau_iia_q3
+from .tableau import butcher_radau_iia_q4 as butcher_radau_iia_q4
+from .tableau import collocation_tableau as collocation_tableau
 
 __all__ = [
     "MLP",
@@ -30,10 +34,14 @@ __all__ = [
     "barycentric_weights",
     "butcher_gauss_legendre_q2",
     "butcher_gauss_legendre_q3",
+    "butcher_gauss_legendre_q4",
     "butcher_lobatto_iiia_q2",
     "butcher_lobatto_iiia_q3",
+    "butcher_lobatto_iiia_q4",
     "butcher_radau_iia_q2",
     "butcher_radau_iia_q3",
+    "butcher_radau_iia_q4",
+    "collocation_tableau",
     "differentiation_matrix",
     "lagrange_eval",
 ]

@@ -14,13 +14,26 @@ from pinn_rk import (
     TimeMesh,
     butcher_gauss_legendre_q2,
     butcher_gauss_legendre_q3,
+    butcher_gauss_legendre_q4,
     butcher_lobatto_iiia_q2,
     butcher_lobatto_iiia_q3,
+    butcher_lobatto_iiia_q4,
     butcher_radau_iia_q2,
     butcher_radau_iia_q3,
+    butcher_radau_iia_q4,
 )
 
-Method = Literal["gauss2", "radau2", "lobatto2", "gauss3", "radau3", "lobatto3"]
+Method = Literal[
+    "gauss2",
+    "radau2",
+    "lobatto2",
+    "gauss3",
+    "radau3",
+    "lobatto3",
+    "gauss4",
+    "radau4",
+    "lobatto4",
+]
 
 TABLEAUX = {
     "gauss2": butcher_gauss_legendre_q2,
@@ -29,6 +42,9 @@ TABLEAUX = {
     "gauss3": butcher_gauss_legendre_q3,
     "radau3": butcher_radau_iia_q3,
     "lobatto3": butcher_lobatto_iiia_q3,
+    "gauss4": butcher_gauss_legendre_q4,
+    "radau4": butcher_radau_iia_q4,
+    "lobatto4": butcher_lobatto_iiia_q4,
 }
 
 # --- Exact manufactured solution for validation ---

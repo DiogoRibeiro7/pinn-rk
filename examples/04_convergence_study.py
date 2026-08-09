@@ -46,10 +46,13 @@ from pinn_rk import (
     TimeMesh,
     butcher_gauss_legendre_q2,
     butcher_gauss_legendre_q3,
+    butcher_gauss_legendre_q4,
     butcher_lobatto_iiia_q2,
     butcher_lobatto_iiia_q3,
+    butcher_lobatto_iiia_q4,
     butcher_radau_iia_q2,
     butcher_radau_iia_q3,
+    butcher_radau_iia_q4,
 )
 
 # name -> (factory, stages q, classical order p)
@@ -60,6 +63,9 @@ METHODS = {
     "gauss3": (butcher_gauss_legendre_q3, 3, 6),
     "radau3": (butcher_radau_iia_q3, 3, 5),
     "lobatto3": (butcher_lobatto_iiia_q3, 3, 4),
+    "gauss4": (butcher_gauss_legendre_q4, 4, 8),
+    "radau4": (butcher_radau_iia_q4, 4, 7),
+    "lobatto4": (butcher_lobatto_iiia_q4, 4, 6),
 }
 
 T_FINAL = 0.1

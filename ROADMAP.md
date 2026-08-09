@@ -29,10 +29,15 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Goal:** Expand RK methods and core numerics.
 
-* [x] **Higher‑order RK**: Gauss, Radau IIA and Lobatto IIIA for q=3 — classical
-  orders 6, 5 and 4. This lifts the accuracy ceiling, because the stage residual
-  converges at the stage order (= stage count) and dominates the objective:
-  measured stage order rises from ~1.9 to ~2.9. q=4 remains open.
+* [x] **Higher‑order RK**: Gauss, Radau IIA and Lobatto IIIA at q=3 and q=4 — classical
+  orders up to 8. Each added stage lifts the accuracy ceiling, because the stage
+  residual converges at the stage order (= stage count) and dominates the objective:
+  measured stage order rises ~1.9 → ~2.9 → ~3.9. `collocation_tableau` builds any
+  collocation family from its nodes, so a new one needs only the nodes.
+
+  Beyond q=4 the residual outruns double precision — Gauss q=4 is already order 8, and
+  `(u_{n+1} - u_n)/k` carries rounding of about ε/k, which the true residual falls
+  below. Going higher needs a reformulation of the residual, not more nodes.
 * [x] **Analytic time derivative** of the Lagrange interpolant (\hat u_t) (replace finite‑diff)
   — done in v0.2.0, and retained as `residual="interpolant"`.
 * [x] **Full Butcher tableau in the residual** — the stage equations bring `A` into

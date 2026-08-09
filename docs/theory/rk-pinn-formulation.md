@@ -63,6 +63,9 @@ local truncation error. Measured on $u = \sin(\pi x)e^{-\pi^2 t}$:
 | `lobatto3` | 3 | 2.92 | 3.91 | 4 |
 | `radau3` | 3 | 2.92 | 4.91 | 5 |
 | `gauss3` | 3 | 2.91 | 5.91 | 6 |
+| `lobatto4` | 4 | 3.88 | 5.85 | 6 |
+| `radau4` | 4 | 3.84 | 6.84 | 7 |
+| `gauss4` | 4 | 3.86 | not measurable | 8 |
 
 Two patterns, both of them consequences of the theory rather than coincidences:
 
@@ -72,8 +75,15 @@ Two patterns, both of them consequences of the theory rather than coincidences:
   equals the number of stages $q$.
 
 Since the objective sums both, the stage term dominates and **the stage order sets the
-ceiling**. That is why moving from $q=2$ to $q=3$ matters more than the classical orders
-alone suggest: it lifts the ceiling from $\mathcal{O}(k^2)$ to $\mathcal{O}(k^3)$.
+ceiling**. That is why the stage count matters more than the classical order alone
+suggests: each added stage lifts the ceiling by one power of $k$, from
+$\mathcal{O}(k^2)$ at $q=2$ to $\mathcal{O}(k^4)$ at $q=4$.
+
+!!! note "Gauss q=4 outruns double precision"
+    Its update residual is order 8, and $(u_{n+1}-u_n)/k$ carries rounding of about
+    $\epsilon/k$ &mdash; near $2.6\times10^{-14}$ at $k=1/120$. The true residual falls
+    below that, so refining the mesh makes the measured value stall instead of fall.
+    On coarse slabs, where it is still visible, the observed rate is $\approx 7.7$.
 
 `tests/test_rk_order.py` pins these orders, so a regression fails as a wrong convergence
 rate rather than as a slightly worse loss.
