@@ -87,6 +87,11 @@ plugins:
   - git-revision-date-localized:
       enable_creation_date: true
       enable_git_follow: false
+      # Snippet-assembled pages have no git history of their own; use the build date
+      # rather than failing. Note the plugin still emits one warning about the docs
+      # directory itself, so `mkdocs build --strict` is not clean for that reason
+      # alone. `gh-deploy` does not use --strict, and CI does not build the docs.
+      fallback_to_build_date: true
       type: timeago
 
 nav:
