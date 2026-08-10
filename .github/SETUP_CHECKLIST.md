@@ -223,6 +223,22 @@ The nav lists only pages that exist. Adding an entry without a page fails
 
 ### Publish to PyPI (Production)
 
+- [x] Published. Uploads happen automatically from
+      `.github/workflows/publish-pypi.yml` when a GitHub release is published, or
+      manually via `workflow_dispatch`.
+- [x] **No API token needed.** Authentication is PyPI Trusted Publishing over OIDC:
+      GitHub mints a short-lived identity for the workflow and PyPI verifies it, so
+      there is no long-lived secret to leak or rotate.
+- [ ] TestPyPI dry runs — would need a separate trusted publisher registered there.
+
+The registration on PyPI names the workflow file, so renaming `publish-pypi.yml`
+breaks publishing until PyPI is updated to match. It is registered **without** a
+GitHub environment; declaring one in the workflow would add an environment claim to
+the OIDC token that the registration does not expect, and the upload would be
+rejected. To gate uploads behind an approval later, change both sides together.
+
+<details><summary>Superseded: API token setup</summary>
+
 - [ ] Get PyPI token:
   - Register at https://pypi.org
   - Create API token
@@ -244,6 +260,8 @@ The nav lists only pages that exist. Adding an entry without a page fails
   ```bash
   pip install pinn-rk
   ```
+
+</details>
 
 ## 🔧 Immediate Action Items
 
@@ -347,7 +365,7 @@ Update this table as you complete items:
 | CI/CD | 2 | 2 | ✅ 100% |
 | Examples | 6 | 6 | ✅ 100% |
 | Docs Website | 9 | 10 | 🔄 90% |
-| PyPI Publishing | 1 | 5 | 🔄 20% |
+| PyPI Publishing | 4 | 5 | 🔄 80% |
 
 ## 🎯 Success Criteria
 
@@ -358,10 +376,9 @@ Current state, checked rather than assumed:
 - [x] Code coverage > 85% — **91%**, and Codecov reports 91.42%
 - [x] Documentation website live — <https://diogoribeiro7.github.io/pinn-rk/>
 - [x] At least 3 working examples — four scripts and two executed notebooks
-- [ ] Package published to PyPI — **not published**; `pip install pinn-rk` returns 404
-- [x] All badges in README resolve. The PyPI version, Python-version and download
-      badges were removed because they pointed at a package that does not exist and
-      rendered as "not found"; restore them once the package is published
+- [x] Package published to PyPI — `pip install pinn-rk` installs 0.6.0
+- [x] All badges in README resolve, including the PyPI version, Python-version and
+      download badges, which are back now that the package exists
 
 ## 🆘 Getting Help
 

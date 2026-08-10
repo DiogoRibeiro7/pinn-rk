@@ -6,7 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-- Nothing yet
+### Added
+
+- **Published on PyPI**: `pip install pinn-rk` installs 0.6.0.
+- `.github/workflows/publish-pypi.yml` uploads on a published GitHub release, with a
+  manual trigger for retries. Authentication is Trusted Publishing over OIDC, so there
+  is no API token anywhere: GitHub mints a short-lived identity for the workflow and
+  PyPI verifies it. Build and publish are separate jobs, and only the publish job holds
+  the `id-token` permission.
+- The build fails if the `pyproject` version disagrees with the release tag. PyPI
+  refuses to reuse a version number even after deletion, so a mismatch is unrecoverable
+  and far cheaper to catch in CI.
+
+### Fixed
+
+- `tests/test_heat_eq.py::test_train_and_error_small_run` was fully unseeded. Neither
+  the network initialisation nor the spatial sampler fixed a seed, so `assert err < 0.35`
+  held only by luck, and it eventually failed on macOS with 0.356. Measured across eight
+  seeds the run spans 0.015 to 0.112, median 0.034, so that failure was a tail event: a
+  poor initialisation occasionally fails to converge within 200 steps. Seeding makes the
+  run deterministic and leaves the bound with more than ten times the headroom.
+- Restored the PyPI version, Python-version and download badges, removed in 0.5.1 when
+  they pointed at a package that did not exist.
+
+### Notes
+
+- The `examples` and `docs` dependency groups are Poetry **groups**, not pip **extras**,
+  so `pip install "pinn-rk[examples]"` does not work. Documented rather than implied;
+  exposing them as real extras is on the roadmap.
 
 ## [0.6.0] - 2026-08-10
 

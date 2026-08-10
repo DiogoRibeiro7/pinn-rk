@@ -170,8 +170,14 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
   it saved. Revisit only if release frequency rises.
 * [x] **Zenodo archiving**: releases are archived automatically and minted a DOI
   (concept DOI `10.5281/zenodo.21839391`)
-* [ ] **Wheels** build + `python -m pip install pinn-rk` sanity
-* [ ] **Badges**: PyPI, version, downloads
+* [x] **Wheels** build + `pip install pinn-rk` — published as 0.6.0. Uploads run from
+  CI over OIDC trusted publishing, with no API token anywhere, and the build fails if
+  the pyproject version disagrees with the release tag.
+* [x] **Badges**: PyPI version, Python versions and downloads, all resolving now that
+  the package exists.
+* [ ] Expose the `examples` and `docs` groups as pip extras, so
+  `pip install "pinn-rk[examples]"` works. They are Poetry groups today, which pip
+  cannot see.
 
 **Deliverables**
 
