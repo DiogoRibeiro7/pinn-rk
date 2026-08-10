@@ -4,12 +4,36 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 ---
 
-## Phase 0 — Foundations (Now)
+## Where things stand
+
+0.6.0 is on PyPI, archived on Zenodo under concept DOI
+[10.5281/zenodo.21839391](https://doi.org/10.5281/zenodo.21839391), documented at
+<https://diogoribeiro7.github.io/pinn-rk/>, and green on CI across three operating
+systems and three Python versions.
+
+| Phase | State |
+| --- | --- |
+| 0 Foundations | done |
+| 1 Numerical breadth | done except samplers and switchable BCs |
+| 2 Convergence & stability | convergence harness only |
+| 3 Performance | not started |
+| 4 Documentation site | done except two guide pages |
+| 5 cG/dG in time | not started |
+| 6 Packaging & releases | done |
+
+The honest summary of the numerics: the tableau now genuinely drives accuracy, and
+measured stage order tracks the stage count up to q=4, where double precision runs
+out. What is missing is breadth of evidence rather than machinery — manufactured
+solutions, error norms and ablations are all still open.
+
+---
+
+## Phase 0 — Foundations (complete)
 
 **Goal:** Solid engineering baseline.
 
 * [x] **Module split completed** and public API re‑exports.
-* [x] **Tests**: unit, E2E smoke, API surface, convergence orders. Coverage is 91%
+* [x] **Tests**: unit, E2E smoke, API surface, convergence orders. Coverage is 93%
   against a target of 85%.
 * [x] **CI**: ruff, mypy, pytest on 3.10–3.12 across Linux, macOS and Windows.
   Poetry-based dependency caching was **removed deliberately**: `setup-python`'s
@@ -18,16 +42,23 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
   was installed into. The job already caches `.venv` keyed on `poetry.lock`, so the
   extra cache bought nothing and broke one matrix entry.
 * [x] **Repo hygiene**: issue/PR templates, dependabot, CODEOWNERS, `.gitignore`.
+  Dependabot alerts are at zero.
+* [ ] **Branch protection** on `main`: require a pull request and a green
+  **All Checks Passed** before merge. Every change since 0.1.0 has gone through a PR
+  with CI green, but nothing enforces it — a direct push to `main` would succeed
+  today.
 
 **Deliverables**
 
-* Passing CI on main
-* Coverage badge (Codecov)
-* CONTRIBUTING.md, SECURITY.md
+* [x] Passing CI on main
+* [x] Coverage badge (Codecov), reporting 93%. Uploads are tokenless, which Codecov
+  warns about on a protected branch; it works, but a `CODECOV_TOKEN` would make it
+  robust against their rate limits.
+* [x] CONTRIBUTING.md, SECURITY.md
 
 **Acceptance**
 
-* Green CI, coverage ≥ 85%, pre‑commit passes locally.
+* [x] Green CI, coverage ≥ 85%, pre‑commit passes locally.
 
 ---
 
@@ -60,15 +91,15 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Deliverables**
 
-* `tableau.py` with q=3,4 factories
-* `interpolants.py` gains `lagrange_basis_and_derivative`
-* `samplers.py` (optional) with Sobol/Halton
-* New tests (properties + convergence checks)
+* [x] `tableau.py` with q=3,4 factories, plus `collocation_tableau` for any others
+* [x] `interpolants.py` gains the barycentric basis and `differentiation_matrix`
+* [ ] `samplers.py` with Sobol/Halton
+* [x] New tests (properties + convergence checks)
 
 **Acceptance**
 
-* Interpolation tests: partition of unity, node exactness, derivative agreement
-* Tiny training runs pass with q=3 on CI
+* [x] Interpolation tests: partition of unity, node exactness, derivative agreement
+* [x] Tiny training runs pass with q=3 on CI
 
 ---
 
@@ -86,8 +117,11 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Deliverables**
 
-* `bench/` with scripts + results; `notebooks/benchmarks.ipynb`
-* `pinn_rk/metrics.py` with L2/H1 estimators
+* [x] Convergence scripts + results. These landed as
+  `examples/04_convergence_study.py` and `examples/notebooks/benchmarking.ipynb`
+  rather than a separate `bench/` directory, which would have duplicated the
+  examples for no gain.
+* [ ] `pinn_rk/metrics.py` with L2/H1 estimators
 
 **Acceptance**
 
@@ -128,16 +162,22 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
   * API reference via mkdocstrings for all seven modules
 * [x] **Examples gallery**: two notebooks committed with executed outputs, so the
   plots and error tables render on GitHub without being run.
-* [ ] Guide pages on BC strategies, and a 2D tutorial (blocked on 2D operators)
+* [ ] A 2D tutorial page. No longer blocked: `LaplacianND` landed in 0.6.0 and
+  `examples/05_2d_heat_equation.py` solves the 2D heat equation end to end. What is
+  missing is only the prose.
+* [ ] A guide page on BC strategies, which needs the soft-BC option from Phase 1
+  first — with only the hard constraint implemented there is nothing to compare.
 * [ ] **Links** to paper(s) and comparisons
 
 **Deliverables**
 
-* `docs/` + `mkdocs.yml`; CI job to build; optional Pages deploy
+* [x] `docs/` + `mkdocs.yml`, a CI job that builds the site on every pull request,
+  and a Pages deploy. The build step was added after a release shipped with docs that
+  did not build; CI now catches that before merge.
 
 **Acceptance**
 
-* Clean site build; internal links validated; examples runnable
+* [x] Clean site build; internal links validated; examples runnable
 
 ---
 
@@ -186,7 +226,8 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Acceptance**
 
-* [x] `v0.1.0` and `v0.2.0` released, archived, and citable by DOI
+* [x] `v0.1.0` through `v0.6.0` released, each archived by Zenodo and citable by its
+  own version DOI under the concept DOI above
 
 ---
 
@@ -201,22 +242,49 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 ## Issue seeds (copy/paste to GitHub)
 
-* feat: add Radau IIA q=3 tableau + unit tests
-* ~~feat: implement analytic Lagrange derivative; replace FD in loss~~ — done in v0.2.0
-* feat: Sobol sampler; config hook and tests
-* feat: Laplacian2D/3D + manufactured solutions
+Still open:
+
+* feat: Sobol/Halton sampler; config hook and tests
+* feat: soft boundary penalty as an alternative to the hard ansatz, switchable
+* feat: manufactured solutions with non-zero source and time-varying BCs
+* feat: rectangular domains — the boundary factor and sampler both assume `[0,1]^d`
+* feat: expose the `examples` and `docs` groups as pip extras
 * test: property‑based tests for interpolation & derivatives (Hypothesis)
 * perf: torch.compile + AMP toggle and benchmarks
-* docs: MkDocs site with tutorials and API
-* bench: convergence harness and plots
-* ~~release: semantic‑release setup and first tagged release~~ — released manually
-  as v0.1.0 and v0.2.0; semantic‑release dropped, see Phase 6
+* docs: 2D tutorial page; BC strategies guide
+* chore: branch protection on `main`
+
+Closed:
+
+* ~~feat: add Radau IIA q=3 tableau + unit tests~~ — v0.4.0, alongside q=4 in v0.5.0
+* ~~feat: implement analytic Lagrange derivative; replace FD in loss~~ — v0.2.0
+* ~~feat: Laplacian2D/3D~~ — v0.6.0, as `LaplacianND` for arbitrary `d`
+* ~~docs: MkDocs site with tutorials and API~~ — v0.4.0, deployed to Pages
+* ~~bench: convergence harness and plots~~ — v0.4.0
+* ~~release: semantic‑release setup and first tagged release~~ — released
+  manually from v0.1.0 to v0.6.0; semantic‑release dropped, see Phase 6
 
 ---
 
 ## Versioning plan
 
-* **v0.1.x** – Foundations + q=2 RK + tests/CI
-* **v0.2.x** – Phase 1–3 features, docs draft
-* **v0.3.x** – cG/dG optional backends, broader PDE gallery
+Where the releases actually went (details in [CHANGELOG.md](./CHANGELOG.md)):
+
+* **v0.1.0** – Foundations: module split, tests, CI, first DOI
+* **v0.2.0** – Analytic Lagrange time derivative in place of finite differences
+* **v0.3.0** – The stage equations, which bring the Butcher `A` matrix into the loss
+* **v0.4.0** – q=3 tableaux, convergence harness, notebooks, docs site
+* **v0.5.0** – q=4 tableaux and `collocation_tableau` (v0.5.1 reconciled the docs
+  with what the code does)
+* **v0.6.0** – Multi-dimensional domains, and publication to PyPI
+
+Ahead, subject to change:
+
+* **v0.7.x** – Samplers, switchable BCs, manufactured solutions (rest of Phases 1–2)
+* **v0.8.x** – Performance: `torch.compile`, AMP, profiling (Phase 3)
+* **v0.9.x** – cG/dG optional backends, broader PDE gallery (Phase 5)
 * **v1.0.0** – Stable API, documented guarantees, benchmarks
+
+The API has been additive since 0.1.0: every release added configuration or tableaux
+without breaking a documented call. `1.0.0` is the point at which that becomes a
+promise rather than an observation.
