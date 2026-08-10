@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Nothing yet
+
+## [0.6.0] - 2026-08-10
+
+Extends the library beyond one spatial dimension, and corrects a scaling in the boundary
+ansatz that made higher dimensions untrainable.
+
+Users upgrading from 0.5.1 should expect different loss values and different trained
+weights even in 1D: the boundary factor gained a constant, which the weights absorb
+without changing solution quality.
+
 ### Added
 
 - **Multi-dimensional domains.** `LaplacianND` computes `-Σ_i ∂²u/∂x_i²` for any number
@@ -473,4 +484,5 @@ When making changes:
 [0.4.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.3.0...v0.4.0
 [0.5.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.4.0...v0.5.0
 [0.5.1]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.0...v0.5.1
-[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.1...HEAD
+[0.6.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.1...v0.6.0
+[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.6.0...HEAD
