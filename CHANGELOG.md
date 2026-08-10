@@ -28,6 +28,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   run deterministic and leaves the bound with more than ten times the headroom.
 - Restored the PyPI version, Python-version and download badges, removed in 0.5.1 when
   they pointed at a package that did not exist.
+- `ROADMAP.md` reconciled with the repo a second time. The 0.5.1 pass fixed the items
+  that were wrongly listed as outstanding; this one fixes what six releases have since
+  invalidated. Coverage was recorded as 91% and is 93%. The 2D tutorial was marked
+  "blocked on 2D operators", which landed in 0.6.0. Four of the nine issue seeds had
+  been implemented. The versioning plan still projected v0.2.x as the next release,
+  three releases after v0.2.0 shipped, and described a Phase 1–3 scope that has since
+  been split differently. Phase 1, 2, 4 and 6 deliverables are now individually
+  checked off rather than left as unmarked bullets, and every phase now says what is
+  actually left in it.
+- Branch protection on `main` is recorded as an open item rather than passed over in
+  silence. Every change since 0.1.0 went through a pull request with CI green, but that
+  is convention, not enforcement: a direct push would succeed today.
 
 ### Notes
 
