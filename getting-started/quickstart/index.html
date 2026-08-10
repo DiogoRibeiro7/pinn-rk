@@ -1391,7 +1391,8 @@ new PDE:</p>
 </span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>    <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 </span></code></pre></div>
 <p>Boundary conditions need no term in the loss. <code>MLP</code> multiplies its output by
-<code>Phi(x) = x(1-x)</code>, so homogeneous Dirichlet conditions hold exactly by construction and
+<code>Phi(x) = prod_i 4 x_i(1-x_i)</code>, so homogeneous Dirichlet conditions hold exactly by
+construction on every face of the unit cube, and
 boundary error never has to be traded against the residual.</p>
 <h2 id="choosing-a-tableau">Choosing a tableau<a class="headerlink" href="#choosing-a-tableau" title="Permanent link">&para;</a></h2>
 <p>All tableaux with the same stage count cost the same per slab, so accuracy is close to
@@ -1520,7 +1521,7 @@ Pass <code>--train</code> to see both side by side.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 10:27:05 UTC"><span class="timeago" datetime="2026-08-10T10:27:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 10:27:05 UTC">2026-08-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 15:53:48 UTC"><span class="timeago" datetime="2026-08-10T15:53:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 15:53:48 UTC">2026-08-10</span>
   </span>
 
     

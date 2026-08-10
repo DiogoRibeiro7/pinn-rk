@@ -1538,10 +1538,20 @@ each step. <code>residual</code> exists so the comparison can be made rather tha
 <h2 id="boundary-and-initial-conditions">Boundary and initial conditions<a class="headerlink" href="#boundary-and-initial-conditions" title="Permanent link">&para;</a></h2>
 <p>Boundary conditions are enforced <strong>structurally</strong>, not by penalty: the ansatz</p>
 <div class="arithmatex">\[
-u_\theta(x,t) = \Phi(x)\,g_\theta(x,t), \qquad \Phi(x) = x(1-x)
+u_\theta(x,t) = \Phi(x)\,g_\theta(x,t), \qquad \Phi(x) = \prod_{i=1}^{d} 4x_i(1-x_i)
 \]</div>
-<p>vanishes at <span class="arithmatex">\(x\in\{0,1\}\)</span> for any <span class="arithmatex">\(g_\theta\)</span>. Boundary error is therefore identically
-zero and never competes with the residual.</p>
+<p>vanishes on every face of <span class="arithmatex">\([0,1]^d\)</span> for any <span class="arithmatex">\(g_\theta\)</span>. Boundary error is therefore
+identically zero and never competes with the residual.</p>
+<div class="admonition note">
+<p class="admonition-title">Why the factor of 4</p>
+<p>It normalises the peak of <span class="arithmatex">\(\Phi\)</span> to 1 in any dimension. Without it <span class="arithmatex">\(\Phi\)</span> peaks
+at <span class="arithmatex">\(4^{-d}\)</span> -- 0.25 in 1D, 0.0625 in 2D, 0.0156 in 3D -- so the network has to
+grow like <span class="arithmatex">\(4^d\)</span> to represent an <span class="arithmatex">\(\mathcal{O}(1)\)</span> solution, and the gradients
+reaching it are attenuated by the same factor. Measured on the 2D heat equation,
+the unnormalised form plateaus near 55% relative error where the normalised one
+reaches 0.4%. In 1D the two are equivalent, since a constant is absorbed by the
+weights.</p>
+</div>
 <p>The initial condition is a penalty, matching <span class="arithmatex">\(\partial_x u_\theta(\cdot,0)\)</span> against
 <span class="arithmatex">\(\partial_x u_0\)</span> in an <span class="arithmatex">\(H^1\)</span> seminorm. Note this constrains the <em>derivative</em>, not the
 values. Its weight relative to the residual is not stable during training — on the
@@ -1549,7 +1559,9 @@ shipped example it is essentially the whole loss at initialisation and about a f
 it a few hundred steps later — so <code>RkPinnConfig.ic_weight</code> exists to control the balance.</p>
 <h2 id="known-limitations">Known limitations<a class="headerlink" href="#known-limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Linear parabolic problems on 1D spatial domains, homogeneous Dirichlet conditions.</li>
+<li>Linear parabolic problems on the unit cube <span class="arithmatex">\([0,1]^d\)</span> with homogeneous Dirichlet
+  conditions. <code>LaplacianND</code> covers any <span class="arithmatex">\(d\)</span>; 2D is exercised end to end by
+  <code>examples/05_2d_heat_equation.py</code>.</li>
 <li>The stage order caps accuracy at <span class="arithmatex">\(\mathcal{O}(k^q)\)</span>; raising <span class="arithmatex">\(q\)</span> is the lever.</li>
 <li>The initial-condition penalty is an <span class="arithmatex">\(H^1\)</span> seminorm, so it does not pin <span class="arithmatex">\(u(\cdot,0)\)</span>
   pointwise.</li>
@@ -1583,7 +1595,7 @@ it a few hundred steps later — so <code>RkPinnConfig.ic_weight</code> exists t
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 10:27:05 UTC"><span class="timeago" datetime="2026-08-10T10:27:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 10:27:05 UTC">2026-08-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 15:53:48 UTC"><span class="timeago" datetime="2026-08-10T15:53:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 15:53:48 UTC">2026-08-10</span>
   </span>
 
     
