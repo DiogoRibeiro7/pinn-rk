@@ -88,6 +88,31 @@ reporting only the second would hide where the error comes from.
 
 --------------------------------------------------------------------------------
 
+### 5\. 2D Heat Equation (`05_2d_heat_equation.py`)
+
+Solve on a two-dimensional domain.
+
+```bash
+python examples/05_2d_heat_equation.py
+```
+
+**What it demonstrates:**
+
+- `LaplacianND`, which works in any number of spatial dimensions
+- Exact boundary conditions on all four edges, with no boundary term in the loss
+- Initial data supplied as a **callable**, which is what makes the H1 penalty work
+  beyond 1D: sampled values would need a sorted grid, and no such ordering exists in 2D
+
+Typical result: ~0.4% relative L2 error at t=0 and ~1.8% at t=T, with the boundary
+satisfied to exactly zero.
+
+Note that in 2D the mode decays like `exp(-2 pi^2 t)`, twice as fast as in 1D, so `T`
+defaults to 0.02 rather than 0.1.
+
+**Expected runtime:** ~2-4 minutes on CPU
+
+--------------------------------------------------------------------------------
+
 ## Jupyter Notebooks
 
 Both notebooks are committed **with their outputs**, so they render on GitHub without

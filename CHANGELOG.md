@@ -6,6 +6,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Multi-dimensional domains.** `LaplacianND` computes `-Σ_i ∂²u/∂x_i²` for any number
+  of spatial dimensions, and the ansatz, sampler and residual now work on the unit cube
+  `[0,1]^d`. `MLP(in_dim=d+1)` takes d spatial coordinates plus time, and
+  `RkPinnConfig.space_dim` selects the dimension. Verified in 1D, 2D and 3D.
+- `RkPinnConfig.init_data` accepts `u0` as a **callable** as well as sampled values.
+  Sampled values are differentiated numerically along a sorted grid, which only exists
+  in 1D; a callable is differentiated by autograd, exactly, in any dimension. Passing
+  sampled values with `space_dim > 1` now fails with an explanatory error rather than
+  differentiating along a meaningless ordering.
+- `examples/05_2d_heat_equation.py`, solving the 2D heat equation end to end.
+- `tests/test_multidim.py`, covering the operator, the ansatz, the residual orders in
+  2D, and the initial-condition paths.
+
+### Changed
+
+- **The boundary factor is now `Φ(x) = Π_i 4 x_i(1-x_i)` rather than `Π_i x_i(1-x_i)`.**
+
+  This changes 1D behaviour: `u = 4x(1-x)·g` instead of `x(1-x)·g`, so loss values and
+  trained weights differ from 0.5.1, even though solution quality does not.
+
+  The factor of 4 per dimension normalises the peak of Φ to 1. Without it Φ peaks at
+  `4^-d` — 0.25 in 1D but 0.0625 in 2D and 0.0156 in 3D — so the network has to grow
+  like `4^d` to represent an O(1) solution, and the gradients reaching it are attenuated
+  by the same factor. Measured on the 2D heat equation with everything else held fixed,
+  the unnormalised form plateaus at 55% relative error while the normalised one reaches
+  0.4%. In 1D the two are equivalent (2.8% against 3.0%), since a constant factor is
+  absorbed by the weights.
+
+  This was caught only by an end-to-end training run. The residual-consistency tests
+  passed in 2D throughout — stage orders 1.89 and 2.89, matching 1D — because they
+  measure the residual against an exact solution and never exercise the network's
+  ability to represent one.
+
+- The time column is built as `[B,1]` rather than with `full_like(x)`, which would be
+  `[B,d]` and silently feed d copies of t to the network.
+
 ### Fixed
 
 - Four more stale claims in the README, found while reviewing the 0.5.1 accuracy pass:

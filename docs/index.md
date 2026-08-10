@@ -225,7 +225,7 @@ See [Examples](examples/overview.md) for more.
 ```
 ┌─────────────┐
 │   Model     │ u(x,t) = φ(x) · g_θ(x,t)
-│   (MLP)     │ φ(x) = x(1-x) enforces BCs
+│   (MLP)     │ φ(x) = ∏ 4xᵢ(1-xᵢ) enforces BCs
 └──────┬──────┘
        │
        ▼

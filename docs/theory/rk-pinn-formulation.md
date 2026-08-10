@@ -118,11 +118,20 @@ size.
 Boundary conditions are enforced **structurally**, not by penalty: the ansatz
 
 $$
-u_\theta(x,t) = \Phi(x)\,g_\theta(x,t), \qquad \Phi(x) = x(1-x)
+u_\theta(x,t) = \Phi(x)\,g_\theta(x,t), \qquad \Phi(x) = \prod_{i=1}^{d} 4x_i(1-x_i)
 $$
 
-vanishes at $x\in\{0,1\}$ for any $g_\theta$. Boundary error is therefore identically
-zero and never competes with the residual.
+vanishes on every face of $[0,1]^d$ for any $g_\theta$. Boundary error is therefore
+identically zero and never competes with the residual.
+
+!!! note "Why the factor of 4"
+    It normalises the peak of $\Phi$ to 1 in any dimension. Without it $\Phi$ peaks
+    at $4^{-d}$ -- 0.25 in 1D, 0.0625 in 2D, 0.0156 in 3D -- so the network has to
+    grow like $4^d$ to represent an $\mathcal{O}(1)$ solution, and the gradients
+    reaching it are attenuated by the same factor. Measured on the 2D heat equation,
+    the unnormalised form plateaus near 55% relative error where the normalised one
+    reaches 0.4%. In 1D the two are equivalent, since a constant is absorbed by the
+    weights.
 
 The initial condition is a penalty, matching $\partial_x u_\theta(\cdot,0)$ against
 $\partial_x u_0$ in an $H^1$ seminorm. Note this constrains the *derivative*, not the
@@ -132,7 +141,9 @@ it a few hundred steps later — so `RkPinnConfig.ic_weight` exists to control t
 
 ## Known limitations
 
-- Linear parabolic problems on 1D spatial domains, homogeneous Dirichlet conditions.
+- Linear parabolic problems on the unit cube $[0,1]^d$ with homogeneous Dirichlet
+  conditions. `LaplacianND` covers any $d$; 2D is exercised end to end by
+  `examples/05_2d_heat_equation.py`.
 - The stage order caps accuracy at $\mathcal{O}(k^q)$; raising $q$ is the lever.
 - The initial-condition penalty is an $H^1$ seminorm, so it does not pin $u(\cdot,0)$
   pointwise.

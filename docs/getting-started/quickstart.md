@@ -68,7 +68,8 @@ for step in range(1, 801):
 ```
 
 Boundary conditions need no term in the loss. `MLP` multiplies its output by
-`Phi(x) = x(1-x)`, so homogeneous Dirichlet conditions hold exactly by construction and
+`Phi(x) = prod_i 4 x_i(1-x_i)`, so homogeneous Dirichlet conditions hold exactly by
+construction on every face of the unit cube, and
 boundary error never has to be traded against the residual.
 
 ## Choosing a tableau
