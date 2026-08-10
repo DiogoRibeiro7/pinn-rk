@@ -214,6 +214,21 @@ jobs:
         run: pydocstyle src/pinn_rk --convention=numpy
         continue-on-error: true
 
+      # The published site is a real artifact, but nothing here used to build it, so a
+      # docs dependency could break https://diogoribeiro7.github.io/pinn-rk/ while CI
+      # stayed green. mkdocstrings imports the package to read its docstrings, so the
+      # project and its docs group both have to be installed.
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "2.2.1"
+
+      - name: Install docs dependencies
+        run: poetry install --no-interaction --with docs
+
+      - name: Build documentation site
+        run: poetry run mkdocs build
+
   build:
     name: Build Distribution
     runs-on: ubuntu-latest
