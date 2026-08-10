@@ -1249,6 +1249,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#051-2026-08-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.5.1 - 2026-08-10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.5.1 - 2026-08-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#050-2026-08-09" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1311,7 +1339,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#fixed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -1439,7 +1467,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixed_1" class="md-nav__link">
+  <a href="#fixed_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -1626,10 +1654,35 @@
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
 <p>All notable changes to this project will be documented in this file.</p>
 <p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>, and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
-<h2 id="unreleased"><a href="https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.0...HEAD">Unreleased</a><a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h2 id="unreleased"><a href="https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.1...HEAD">Unreleased</a><a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Nothing yet</li>
 </ul>
+<h2 id="051-2026-08-10"><a href="https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.0...v0.5.1">0.5.1</a> - 2026-08-10<a class="headerlink" href="#051-2026-08-10" title="Permanent link">&para;</a></h2>
+<p>Documentation accuracy only; no code changes. <code>ROADMAP.md</code> and the setup checklist had
+drifted out of step with the repository, in both directions, and the README advertised a
+package that does not exist.</p>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>ROADMAP.md</code> listed as outstanding several things that are done: the module split and
+  public API, the test suite (coverage is 91% against a target of 85%), the CI matrix,
+  repo hygiene, the convergence harness (<code>examples/04_convergence_study.py</code>), and the
+  documentation site. Marked complete, with the remaining work left open and honest.</li>
+<li>Poetry dependency caching is recorded as <strong>deliberately removed</strong> rather than
+  outstanding. <code>setup-python</code>'s <code>cache: "poetry"</code> needs Poetry on PATH before that step,
+  and installing it first is unreliable on macOS; the job already caches <code>.venv</code> keyed on
+  <code>poetry.lock</code>.</li>
+<li><code>.github/SETUP_CHECKLIST.md</code> carried ten stale TODOs for files that now exist, and a
+  progress table understating four categories. Its success criteria claimed the package
+  was published to PyPI and that all badges were green; neither was true.</li>
+<li>Removed the PyPI version, Python-version and download badges from the README. The
+  package is not on PyPI, so all three rendered as "not found". The Python versions are
+  now a static badge reflecting <code>pyproject.toml</code>, and the PyPI badges should return when
+  the package is published.</li>
+<li>Corrected the code-style badge link, which pointed at Black rather than Ruff.</li>
+</ul>
+<p>The Codecov badge was checked and left alone: it is genuine, reporting 91.42%, which
+agrees with the local measurement.</p>
 <h2 id="050-2026-08-09"><a href="https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.4.0...v0.5.0">0.5.0</a> - 2026-08-09<a class="headerlink" href="#050-2026-08-09" title="Permanent link">&para;</a></h2>
 <p>Completes the higher-order roadmap item with four-stage tableaux, and adds a builder
 that constructs any collocation family from its nodes alone.</p>
@@ -1720,7 +1773,7 @@ deployed for the first time.</p>
   notebooks as plain JSON so it runs in CI, where the optional <code>examples</code> dependency
   group is not installed.</li>
 </ul>
-<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>examples/README.md</code> documented <code>03_custom_operator.py</code>, <code>04_convergence_study.py</code>,
   and both notebooks, none of which existed. The notebooks now exist; the two scripts
@@ -1844,7 +1897,7 @@ difference of the network.</p>
 <p>First published release. The package was developed on an unreleased <code>develop</code>
 branch and never tagged, so this entry covers both the initial feature set and
 the correctness fixes made before publication.</p>
-<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
 <p>Each of the following was present throughout development and is fixed here, in
 the first release to reach users:</p>
 <ul>
@@ -2036,7 +2089,7 @@ the first release to reach users:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 07:47:14 UTC"><span class="timeago" datetime="2026-08-10T07:47:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 07:47:14 UTC">2026-08-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 10:27:05 UTC"><span class="timeago" datetime="2026-08-10T10:27:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 10:27:05 UTC">2026-08-10</span>
   </span>
 
     

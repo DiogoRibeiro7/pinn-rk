@@ -1391,10 +1391,16 @@
 <h2 id="phase-0-foundations-now">Phase 0 — Foundations (Now)<a class="headerlink" href="#phase-0-foundations-now" title="Permanent link">&para;</a></h2>
 <p><strong>Goal:</strong> Solid engineering baseline.</p>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Module split completed</strong> (✅ code done) and public API re‑exports.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Tests</strong>: unit, E2E smoke, API surface; coverage target ≥ 85%.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>CI</strong>: ruff, mypy, pytest on 3.10–3.12 and 3 OSs; cache Poetry.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Repo hygiene</strong>: issue/PR templates, dependabot, CODEOWNERS.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Module split completed</strong> and public API re‑exports.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Tests</strong>: unit, E2E smoke, API surface, convergence orders. Coverage is 91%
+  against a target of 85%.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>CI</strong>: ruff, mypy, pytest on 3.10–3.12 across Linux, macOS and Windows.
+  Poetry-based dependency caching was <strong>removed deliberately</strong>: <code>setup-python</code>'s
+  <code>cache: "poetry"</code> needs Poetry on PATH before that step runs, and installing it
+  first is unreliable on macOS, where <code>setup-python</code> replaces the Python that Poetry
+  was installed into. The job already caches <code>.venv</code> keyed on <code>poetry.lock</code>, so the
+  extra cache bought nothing and broke one matrix entry.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Repo hygiene</strong>: issue/PR templates, dependabot, CODEOWNERS, <code>.gitignore</code>.</li>
 </ul>
 <p><strong>Deliverables</strong></p>
 <ul>
@@ -1444,7 +1450,10 @@
 <h2 id="phase-2-convergence-stability-mraligned-design">Phase 2 — Convergence, stability &amp; MR‑aligned design<a class="headerlink" href="#phase-2-convergence-stability-mraligned-design" title="Permanent link">&para;</a></h2>
 <p><strong>Goal:</strong> Evidence of correctness and stable training design.</p>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Convergence harness</strong>: sweep (N, steps) and RK (Gauss/Radau/Lobatto); save CSV + plots.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Convergence harness</strong>: <code>examples/04_convergence_study.py</code> sweeps N across any
+  subset of the nine tableaux, fits log-log rates, and supports <code>--train</code>,
+  <code>--save-plots</code> and <code>--export-csv</code>. It reports consistency error and trained L2
+  separately, since the first bounds the second but does not predict it.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Manufactured solutions</strong>: 1D/2D with non‑zero (f), time‑varying BCs.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Error norms</strong>: L2 and H1 utilities; optional final‑time H1 penalty.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Ablations</strong>: BC enforcement (hard vs soft), sampler choice, RK scheme.</li>
@@ -1482,14 +1491,17 @@
 <p><strong>Goal:</strong> Publish high‑quality docs.</p>
 <ul class="task-list">
 <li class="task-list-item">
-<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>MkDocs Material</strong> site with:</p>
+<p><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>MkDocs Material</strong> site, live at
+  <a href="https://diogoribeiro7.github.io/pinn-rk/">https://diogoribeiro7.github.io/pinn-rk/</a>:</p>
 </li>
 <li>
-<p>Guide: concepts, RK loss construction, BC strategies</p>
+<p>Getting started: installation and quick start</p>
 </li>
-<li>Tutorials: 1D heat, 2D Poisson‑type, custom RHS/BCs</li>
-<li>API reference via mkdocstrings</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Examples gallery</strong> (plots, error tables)</li>
+<li>Theory: the RK-PINN formulation and what the measured orders do and do not mean</li>
+<li>API reference via mkdocstrings for all seven modules</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Examples gallery</strong>: two notebooks committed with executed outputs, so the
+  plots and error tables render on GitHub without being run.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Guide pages on BC strategies, and a 2D tutorial (blocked on 2D operators)</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Links</strong> to paper(s) and comparisons</li>
 </ul>
 <p><strong>Deliverables</strong></p>
@@ -1591,7 +1603,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 07:47:14 UTC"><span class="timeago" datetime="2026-08-10T07:47:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 07:47:14 UTC">2026-08-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 10:27:05 UTC"><span class="timeago" datetime="2026-08-10T10:27:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 10:27:05 UTC">2026-08-10</span>
   </span>
 
     
