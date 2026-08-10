@@ -1,6 +1,14 @@
 line-length = 100
 target-version = "py311"
 
+[format]
+# Ruff 0.16 began formatting Python inside Markdown fences. The snippets in README.md,
+# SECURITY.md and the docs pages align their trailing comments deliberately, in tables of
+# options and tableau listings where the alignment is what makes them readable, and the
+# formatter collapses that. Markdown is therefore excluded from formatting only.
+# `ruff check` still lints these blocks, so genuinely broken snippets are still caught.
+exclude = ["*.md"]
+
 [lint]
 select = ["E", "F", "I", "UP", "B", "C4", "T20", "RUF"]
 ignore = [
