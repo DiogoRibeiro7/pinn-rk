@@ -64,11 +64,14 @@ jobs:
     name: Publish to PyPI
     needs: build
     runs-on: ubuntu-latest
-    # Add required reviewers to this environment in the repository settings to gate
-    # uploads behind a manual approval. A PyPI upload cannot be undone.
-    environment:
-      name: pypi
-      url: https://pypi.org/p/pinn-rk
+    # Deliberately no `environment:` here. PyPI matches the environment claim in the
+    # OIDC token against the trusted publisher registration, and this project's
+    # publisher is registered without one; declaring an environment would put a claim in
+    # the token that the registration does not expect, and the upload would be rejected.
+    #
+    # A GitHub environment with required reviewers is the usual way to gate an upload
+    # behind manual approval, and an upload cannot be undone. To add that later, change
+    # both sides together: set the environment name on PyPI *and* reinstate it here.
     permissions:
       # The only permission trusted publishing needs. Kept at job level so the build
       # job above cannot mint an identity token.
