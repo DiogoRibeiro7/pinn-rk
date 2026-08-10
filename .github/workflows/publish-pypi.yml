@@ -1,0 +1,83 @@
+name: Publish to PyPI
+
+# Publishes on a published GitHub release, which is how this project cuts releases
+# (see the checklist in CONTRIBUTING.md). Also runnable by hand for a retry.
+#
+# Authentication is PyPI Trusted Publishing over OIDC: GitHub mints a short-lived
+# identity token for this workflow and PyPI verifies it. There is no API token, so
+# there is no long-lived secret to leak or rotate.
+#
+# PyPI has to be told which workflow it trusts. The registration must name this file --
+# publish-pypi.yml -- so renaming it breaks publishing until PyPI is updated to match.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build distributions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "2.2.1"
+
+      - name: Build sdist and wheel
+        run: poetry build
+
+      # A version that disagrees with the tag cannot be taken back: PyPI refuses to
+      # reuse a version number even after deletion. Cheaper to fail here.
+      - name: Check the built version matches the release tag
+        if: github.event_name == 'release'
+        run: |
+          BUILT=$(poetry version --short)
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "built=$BUILT  tag=$TAG"
+          if [ "$BUILT" != "$TAG" ]; then
+            echo "::error::pyproject version ($BUILT) does not match release tag ($TAG)"
+            exit 1
+          fi
+
+      - name: Validate metadata
+        run: |
+          pipx run twine check dist/*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # Add required reviewers to this environment in the repository settings to gate
+    # uploads behind a manual approval. A PyPI upload cannot be undone.
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pinn-rk
+    permissions:
+      # The only permission trusted publishing needs. Kept at job level so the build
+      # job above cannot mint an identity token.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
