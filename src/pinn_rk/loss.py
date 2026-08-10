@@ -39,24 +39,45 @@ class RkPinnLoss(nn.Module):
             raise ValueError("ic_weight must be non-negative.")
 
         if cfg.init_data is not None:
-            # The H¹ penalty differentiates the sampled u0 along this grid, which is
-            # only meaningful if the samples are ordered.
-            x0_init = cfg.init_data[0]
-            if x0_init.ndim != 2 or x0_init.shape[1] != 1:
-                raise ValueError("init_data x0 must be a [N,1] tensor.")
-            if not bool(torch.all(x0_init[1:, 0] > x0_init[:-1, 0])):
+            x0_init, u0_init = cfg.init_data
+            if x0_init.ndim != 2 or x0_init.shape[1] != cfg.space_dim:
                 raise ValueError(
-                    "init_data x0 must be sorted in strictly increasing order; the "
-                    "initial-condition penalty differentiates u0 on this grid."
+                    f"init_data x0 must be [N,{cfg.space_dim}] for space_dim="
+                    f"{cfg.space_dim}; got {tuple(x0_init.shape)}."
                 )
+            if not callable(u0_init):
+                # Sampled u0 is differentiated numerically along the x0 grid, which
+                # needs an ordering. That exists only in 1D, and only if x0 is sorted.
+                if cfg.space_dim != 1:
+                    raise ValueError(
+                        "init_data u0 given as sampled values is supported only for "
+                        "space_dim=1, because the target derivative is taken along a "
+                        "sorted grid. Pass u0 as a callable u0(x) -> Tensor instead; "
+                        "autograd then supplies the derivative in any dimension."
+                    )
+                if not bool(torch.all(x0_init[1:, 0] > x0_init[:-1, 0])):
+                    raise ValueError(
+                        "init_data x0 must be sorted in strictly increasing order; the "
+                        "initial-condition penalty differentiates u0 on this grid."
+                    )
 
         self._cache: dict[int, dict[str, Tensor]] = {}
 
-    @staticmethod
-    def _default_uniform_sampler(n: int, device: torch.device) -> Tensor:
-        # Uniform in (0,1); avoid exact boundaries as BCs are embedded in the ansatz.
-        x = torch.rand(n, 1, device=device, dtype=torch.float64)
+    def _default_uniform_sampler(self, n: int, device: torch.device) -> Tensor:
+        # Uniform in (0,1)^d; avoid exact boundaries as BCs are embedded in the ansatz,
+        # where Phi vanishes and the sample would carry no information.
+        x = torch.rand(n, self.cfg.space_dim, device=device, dtype=torch.float64)
         return (1e-6) + (1 - 2e-6) * x
+
+    def _times_like(self, x: Tensor, value: float) -> Tensor:
+        """
+        A [B,1] column of a single time.
+
+        Time is one coordinate whatever the spatial dimension is, so this cannot be
+        `full_like(x)`: that would be [B,d] and silently feed d copies of t to the
+        network.
+        """
+        return torch.full((x.shape[0], 1), value, device=x.device, dtype=self.cfg.dtype)
 
     def _stage_times(self, n: int) -> Tensor:
         t_n = self.cfg.time_mesh.nodes[n]
@@ -99,7 +120,7 @@ class RkPinnLoss(nn.Module):
         Lu_stage: list[Tensor] = []
         f_stage: list[Tensor] = []
         for i in range(t_stage.numel()):
-            ti = torch.full_like(x, fill_value=t_stage[i].item())
+            ti = self._times_like(x, float(t_stage[i].item()))
             ui = self._eval_model(x, ti)  # [B,1]
             u_stage.append(ui)
             Lu_stage.append(self.L(x, ui))  # [B,1]
@@ -158,7 +179,7 @@ class RkPinnLoss(nn.Module):
         b = bt.b.to(device=device, dtype=dtype)  # [q]
         times = self.cfg.time_mesh
 
-        u_n = self._eval_model(x, torch.full_like(x, float(times.nodes[n].item())))  # [B,1]
+        u_n = self._eval_model(x, self._times_like(x, float(times.nodes[n].item())))  # [B,1]
         U, LU, F_rhs = self._stage_values(x, t_stage)
         F = F_rhs - LU  # u' = f - L u, evaluated at the stage nodes  [B,q,1]
 
@@ -166,7 +187,7 @@ class RkPinnLoss(nn.Module):
         r_stage = (U - u_n.unsqueeze(1)) / k_n - torch.einsum("ij,bjk->bik", A, F)  # [B,q,1]
 
         # Update equation, carrying the tableau's classical order.
-        u_next = self._eval_model(x, torch.full_like(x, float(times.nodes[n + 1].item())))
+        u_next = self._eval_model(x, self._times_like(x, float(times.nodes[n + 1].item())))
         r_step = (u_next - u_n) / k_n - torch.einsum("i,bik->bk", b, F)  # [B,1]
         return r_stage, r_step
 
@@ -188,7 +209,7 @@ class RkPinnLoss(nn.Module):
 
         interp_t, extended = self._interp_nodes(t_stage, times.nodes[n])
         if extended:
-            t_start = torch.full_like(x, float(times.nodes[n].item()))
+            t_start = self._times_like(x, float(times.nodes[n].item()))
             u_start = self._eval_model(x, t_start)  # [B,1]
             U_interp = torch.cat([u_start.unsqueeze(1), U], dim=1)  # [B,q+1,1]
         else:
@@ -227,10 +248,9 @@ class RkPinnLoss(nn.Module):
 
         # Initial condition H¹ seminorm penalty if provided
         if self.cfg.init_data is not None and self.cfg.ic_weight != 0.0:
-            x0, u0 = self.cfg.init_data
-            x0 = x0.to(device=device, dtype=dtype)
-            u0 = u0.to(device=device, dtype=dtype)
-            t0 = torch.zeros_like(x0)
+            x0_raw, u0_spec = self.cfg.init_data
+            x0 = x0_raw.to(device=device, dtype=dtype)
+            t0 = self._times_like(x0, 0.0)
             u_init = self._eval_model(x0, t0)
             grad_u = torch.autograd.grad(
                 u_init,
@@ -239,13 +259,25 @@ class RkPinnLoss(nn.Module):
                 create_graph=True,
                 retain_graph=True,
                 only_inputs=True,
-            )[0]
-            # u0 is supplied as sampled values and carries no autograd history, so the
-            # target derivative ∂ₓu₀ is taken numerically on the x0 grid rather than by
-            # autograd. Constant w.r.t. θ, hence detached.
-            x0_grid = x0.detach().squeeze(1)
-            u0_grid = u0.detach().squeeze(1)
-            grad_u0 = torch.gradient(u0_grid, spacing=(x0_grid,))[0].unsqueeze(1)
+            )[0]  # [N,d]
+
+            if callable(u0_spec):
+                # A callable can be differentiated directly, which works in any number
+                # of dimensions and is exact rather than a grid approximation.
+                x0_probe = x0.detach().clone().requires_grad_(True)
+                u0_vals = u0_spec(x0_probe)
+                grad_u0 = torch.autograd.grad(
+                    u0_vals, x0_probe, torch.ones_like(u0_vals), only_inputs=True
+                )[0].detach()
+            else:
+                # Sampled values carry no autograd history, so the target derivative is
+                # taken numerically along the x0 grid. That needs an ordering, which
+                # only exists in 1D; the callable form covers everything else.
+                u0 = u0_spec.to(device=device, dtype=dtype)
+                x0_grid = x0.detach().squeeze(1)
+                u0_grid = u0.detach().squeeze(1)
+                grad_u0 = torch.gradient(u0_grid, spacing=(x0_grid,))[0].unsqueeze(1)
+
             total = total + self.cfg.ic_weight * torch.nn.functional.mse_loss(grad_u, grad_u0)
 
         if not torch.isfinite(total):

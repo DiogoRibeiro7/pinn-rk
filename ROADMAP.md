@@ -51,7 +51,11 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
   2 (Lobatto IIIA q=2). Previously `A` was validated but never read, so the choice
   of tableau had no effect on accuracy.
 * [ ] **Sampling strategies**: uniform | Sobol | Halton; stratified in time.
-* [ ] **Operators**: Laplacian2D/3D; rectangular domains.
+* [x] **Operators**: `LaplacianND` covers any number of spatial dimensions, verified in
+  1D, 2D and 3D, and the ansatz, sampler and residual work on the unit cube `[0,1]^d`.
+  The stage orders measured in 2D match 1D exactly, so the time discretisation is
+  unchanged. Rectangular (non-unit) domains are still open: the boundary factor and the
+  default sampler both assume `[0,1]^d`.
 * [ ] **Boundary handling options**: hard BC via (\phi(x)) vs soft penalty; switchable.
 
 **Deliverables**

@@ -10,6 +10,7 @@ from .mesh import TimeMesh as TimeMesh
 from .model import MLP as MLP
 from .operators import EllipticOperator as EllipticOperator
 from .operators import Laplacian1D as Laplacian1D
+from .operators import LaplacianND as LaplacianND
 from .tableau import ButcherTableau as ButcherTableau
 from .tableau import butcher_gauss_legendre_q2 as butcher_gauss_legendre_q2
 from .tableau import butcher_gauss_legendre_q3 as butcher_gauss_legendre_q3
@@ -27,6 +28,7 @@ __all__ = [
     "ButcherTableau",
     "EllipticOperator",
     "Laplacian1D",
+    "LaplacianND",
     "RkPinnConfig",
     "RkPinnLoss",
     "TimeMesh",

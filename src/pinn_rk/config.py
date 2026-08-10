@@ -62,8 +62,19 @@ class RkPinnConfig:
         Torch device for tensors and model.
     dtype:
         Torch dtype used across computations.
+    space_dim:
+        Number of spatial dimensions d. The default sampler draws points in the unit
+        cube [0,1]^d, and the network is expected to take x of shape [B, d].
     init_data:
-        Optional tuple (x0, u0(x0)) to impose initial H¹ seminorm penalty.
+        Optional tuple ``(x0, u0)`` imposing an initial H¹ seminorm penalty, where u0 is
+        either
+
+        * a Tensor of sampled values — 1D only, since the target derivative is then
+          taken numerically along the (sorted) x0 grid; or
+        * a callable ``u0(x) -> Tensor``, which works in any dimension because the
+          target derivative comes from autograd rather than from a grid.
+
+        In more than one dimension the callable form is required.
     ic_weight:
         Multiplier on the initial-condition penalty, relative to the PDE residual.
 
@@ -84,5 +95,6 @@ class RkPinnConfig:
     n_x_train: int = 256
     device: _device = field(default_factory=lambda: torch.device("cpu"))
     dtype: torch.dtype = torch.float64
-    init_data: tuple[Tensor, Tensor] | None = None
+    init_data: tuple[Tensor, Tensor] | tuple[Tensor, Callable[[Tensor], Tensor]] | None = None
     ic_weight: float = 1.0
+    space_dim: int = 1
