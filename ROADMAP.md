@@ -8,10 +8,16 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Goal:** Solid engineering baseline.
 
-* [ ] **Module split completed** (✅ code done) and public API re‑exports.
-* [ ] **Tests**: unit, E2E smoke, API surface; coverage target ≥ 85%.
-* [ ] **CI**: ruff, mypy, pytest on 3.10–3.12 and 3 OSs; cache Poetry.
-* [ ] **Repo hygiene**: issue/PR templates, dependabot, CODEOWNERS.
+* [x] **Module split completed** and public API re‑exports.
+* [x] **Tests**: unit, E2E smoke, API surface, convergence orders. Coverage is 91%
+  against a target of 85%.
+* [x] **CI**: ruff, mypy, pytest on 3.10–3.12 across Linux, macOS and Windows.
+  Poetry-based dependency caching was **removed deliberately**: `setup-python`'s
+  `cache: "poetry"` needs Poetry on PATH before that step runs, and installing it
+  first is unreliable on macOS, where `setup-python` replaces the Python that Poetry
+  was installed into. The job already caches `.venv` keyed on `poetry.lock`, so the
+  extra cache bought nothing and broke one matrix entry.
+* [x] **Repo hygiene**: issue/PR templates, dependabot, CODEOWNERS, `.gitignore`.
 
 **Deliverables**
 
@@ -66,7 +72,10 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Goal:** Evidence of correctness and stable training design.
 
-* [ ] **Convergence harness**: sweep (N, steps) and RK (Gauss/Radau/Lobatto); save CSV + plots.
+* [x] **Convergence harness**: `examples/04_convergence_study.py` sweeps N across any
+  subset of the nine tableaux, fits log-log rates, and supports `--train`,
+  `--save-plots` and `--export-csv`. It reports consistency error and trained L2
+  separately, since the first bounds the second but does not predict it.
 * [ ] **Manufactured solutions**: 1D/2D with non‑zero (f), time‑varying BCs.
 * [ ] **Error norms**: L2 and H1 utilities; optional final‑time H1 penalty.
 * [ ] **Ablations**: BC enforcement (hard vs soft), sampler choice, RK scheme.
@@ -107,12 +116,15 @@ A pragmatic, incremental plan to evolve **pinn-rk** into a robust, research‑gr
 
 **Goal:** Publish high‑quality docs.
 
-* [ ] **MkDocs Material** site with:
+* [x] **MkDocs Material** site, live at
+  <https://diogoribeiro7.github.io/pinn-rk/>:
 
-  * Guide: concepts, RK loss construction, BC strategies
-  * Tutorials: 1D heat, 2D Poisson‑type, custom RHS/BCs
-  * API reference via mkdocstrings
-* [ ] **Examples gallery** (plots, error tables)
+  * Getting started: installation and quick start
+  * Theory: the RK-PINN formulation and what the measured orders do and do not mean
+  * API reference via mkdocstrings for all seven modules
+* [x] **Examples gallery**: two notebooks committed with executed outputs, so the
+  plots and error tables render on GitHub without being run.
+* [ ] Guide pages on BC strategies, and a 2D tutorial (blocked on 2D operators)
 * [ ] **Links** to paper(s) and comparisons
 
 **Deliverables**

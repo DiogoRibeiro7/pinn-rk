@@ -8,6 +8,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Nothing yet
 
+## [0.5.1] - 2026-08-10
+
+Documentation accuracy only; no code changes. `ROADMAP.md` and the setup checklist had
+drifted out of step with the repository, in both directions, and the README advertised a
+package that does not exist.
+
+### Fixed
+
+- `ROADMAP.md` listed as outstanding several things that are done: the module split and
+  public API, the test suite (coverage is 91% against a target of 85%), the CI matrix,
+  repo hygiene, the convergence harness (`examples/04_convergence_study.py`), and the
+  documentation site. Marked complete, with the remaining work left open and honest.
+- Poetry dependency caching is recorded as **deliberately removed** rather than
+  outstanding. `setup-python`'s `cache: "poetry"` needs Poetry on PATH before that step,
+  and installing it first is unreliable on macOS; the job already caches `.venv` keyed on
+  `poetry.lock`.
+- `.github/SETUP_CHECKLIST.md` carried ten stale TODOs for files that now exist, and a
+  progress table understating four categories. Its success criteria claimed the package
+  was published to PyPI and that all badges were green; neither was true.
+- Removed the PyPI version, Python-version and download badges from the README. The
+  package is not on PyPI, so all three rendered as "not found". The Python versions are
+  now a static badge reflecting `pyproject.toml`, and the PyPI badges should return when
+  the package is published.
+- Corrected the code-style badge link, which pointed at Black rather than Ruff.
+
+The Codecov badge was checked and left alone: it is genuine, reporting 91.42%, which
+agrees with the local measurement.
+
 ## [0.5.0] - 2026-08-09
 
 Completes the higher-order roadmap item with four-stage tableaux, and adds a builder
@@ -401,4 +429,5 @@ When making changes:
 [0.3.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.3.0...v0.4.0
 [0.5.0]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.4.0...v0.5.0
-[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.0...HEAD
+[0.5.1]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.0...v0.5.1
+[unreleased]: https://github.com/DiogoRibeiro7/pinn-rk/compare/v0.5.1...HEAD

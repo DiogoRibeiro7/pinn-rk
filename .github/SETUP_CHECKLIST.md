@@ -69,10 +69,11 @@ This checklist guides you through setting up all the professional components for
 
 ### Setup Codecov
 
-- [ ] Sign up at https://codecov.io
-- [ ] Add repository to Codecov
-- [ ] Get Codecov token
-- [ ] Add `CODECOV_TOKEN` to GitHub Secrets:
+- [x] Sign up at <https://codecov.io> — done; the repository reports 91.42%
+- [x] Add repository to Codecov — done
+- [ ] Get Codecov token — not needed. Public repositories upload tokenlessly from
+      GitHub Actions, and the workflow already sets `fail_ci_if_error: false`.
+      Add one only if uploads start being rejected:
   - Go to repository Settings → Secrets and variables → Actions
   - Click "New repository secret"
   - Name: `CODECOV_TOKEN`
@@ -107,14 +108,15 @@ This checklist guides you through setting up all the professional components for
   - Performance benchmarking
   - Results table
 
-- [ ] `examples/03_custom_operator.py` - TODO
-  - Implement custom PDE operator
-  - Reaction-diffusion example
+- [x] `examples/03_custom_operator.py` - Created ✓
+  - Custom `EllipticOperator` for reaction-diffusion
+  - Non-zero right-hand side from a manufactured solution
+  - Validates the operator against its closed form before training
 
-- [ ] `examples/04_convergence_study.py` - TODO
-  - Systematic convergence analysis
-  - Plot generation
-  - CSV export
+- [x] `examples/04_convergence_study.py` - Created ✓
+  - Systematic convergence analysis with fitted rates
+  - Plot generation (`--save-plots`)
+  - CSV export (`--export-csv`)
 
 ### Jupyter Notebooks
 
@@ -147,14 +149,15 @@ This checklist guides you through setting up all the professional components for
 
 ### Documentation Pages
 
-- [ ] `docs/getting-started/installation.md` - TODO
-- [ ] `docs/getting-started/quickstart.md` - TODO
-- [ ] `docs/getting-started/concepts.md` - TODO
-- [ ] `docs/theory/mathematical-background.md` - TODO
-- [ ] `docs/theory/rk-pinn-formulation.md` - TODO
-- [ ] `docs/guide/configuration.md` - TODO
-- [ ] `docs/guide/training.md` - TODO
-- [ ] `docs/api/config.md` - TODO (auto-generated via mkdocstrings)
+- [x] `docs/getting-started/installation.md` - Created ✓
+- [x] `docs/getting-started/quickstart.md` - Created ✓
+- [x] `docs/theory/rk-pinn-formulation.md` - Created ✓
+- [x] `docs/api/*.md` - Created ✓ (all seven modules, via mkdocstrings)
+- [x] Site deployed to GitHub Pages ✓
+- [ ] `docs/guide/` pages on configuration and training
+
+The nav lists only pages that exist. Adding an entry without a page fails
+`mkdocs build --strict`, which is the intended behaviour.
 
 ### Deploy Documentation
 
@@ -341,22 +344,24 @@ Update this table as you complete items:
 |----------|------------|-------------|----------|
 | Documentation | 4 | 4 | ✅ 100% |
 | GitHub Templates | 3 | 3 | ✅ 100% |
-| CI/CD | 1 | 2 | 🔄 50% |
-| Examples | 3 | 6 | 🔄 50% |
-| Docs Website | 2 | 10 | 🔄 20% |
+| CI/CD | 2 | 2 | ✅ 100% |
+| Examples | 6 | 6 | ✅ 100% |
+| Docs Website | 9 | 10 | 🔄 90% |
 | PyPI Publishing | 1 | 5 | 🔄 20% |
 
 ## 🎯 Success Criteria
 
-Your repository is professional when:
+Current state, checked rather than assumed:
 
-- ✅ All high-priority items completed
-- ✅ CI passing on all platforms
-- ✅ Code coverage > 85%
-- ✅ Documentation website live
-- ✅ At least 3 working examples
-- ✅ Package published to PyPI
-- ✅ All badges green in README
+- [x] All high-priority items completed
+- [x] CI passing on all platforms (9 matrix jobs: Linux, macOS, Windows x 3.10-3.12)
+- [x] Code coverage > 85% — **91%**, and Codecov reports 91.42%
+- [x] Documentation website live — <https://diogoribeiro7.github.io/pinn-rk/>
+- [x] At least 3 working examples — four scripts and two executed notebooks
+- [ ] Package published to PyPI — **not published**; `pip install pinn-rk` returns 404
+- [x] All badges in README resolve. The PyPI version, Python-version and download
+      badges were removed because they pointed at a package that does not exist and
+      rendered as "not found"; restore them once the package is published
 
 ## 🆘 Getting Help
 
