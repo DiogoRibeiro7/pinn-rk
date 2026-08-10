@@ -9,7 +9,7 @@
   <a href="https://github.com/astral-sh/ruff"><img alt="Code style: ruff" src="https://img.shields.io/badge/code%20style-ruff-000000.svg"></a>
 </p>
 
-Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete losses** in PyTorch. Supports Gauss, Radau IIA, and Lobatto IIIA Runge–Kutta schemes via Butcher tableaux, with boundary-conditioned neural ansatz and an end‑to‑end example for the 1D heat equation.
+Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete losses** in PyTorch. Ships Gauss–Legendre, Radau IIA and Lobatto IIIA at 2, 3 and 4 stages — classical orders up to 8 — with a boundary‑conditioned neural ansatz and an end‑to‑end example for the 1D heat equation.
 
 > See **[ROADMAP.md](./ROADMAP.md)** for milestones and planned features.
 
@@ -18,7 +18,7 @@ Runge–Kutta Physics‑Informed Neural Networks (PINNs) with **time‑discrete 
 ## Key features
 
 * **Time‑discrete residual** built from Runge–Kutta collocation: residuals evaluated at stage nodes and integrated with RK weights.
-* **General RK backend** via `ButcherTableau` (Gauss/Radau/Lobatto included; easily extensible).
+* **General RK backend** via `ButcherTableau` — nine tableaux included, and `collocation_tableau(nodes)` derives a new collocation family from its nodes alone.
 * **Boundary conditioning** through a multiplicative factor $\Phi(x)$ to satisfy homogeneous Dirichlet BCs exactly.
 * **Modular PDE operators** (e.g., `Laplacian1D`) with autograd‑based derivatives.
 * **Practical implementation**: type hints, ruff/mypy clean, tests, and GitHub Actions CI.
@@ -47,7 +47,7 @@ import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = train_heat_equation(
-    method="radau2",   # "gauss2" | "radau2" | "lobatto2"
+    method="radau3",   # gauss2|radau2|lobatto2 · gauss3|radau3|lobatto3 · gauss4|radau4|lobatto4
     T=0.1,
     N=20,
     n_x_train=256,
@@ -110,7 +110,7 @@ Gauss q=4 is order 8, which is past what double precision can measure here. The 
 
 The update residual recovers each method's **classical order**, which is what makes the choice of tableau meaningful: Gauss and Radau cost the same stages, and Gauss is orders of magnitude more consistent at the same slab size.
 
-The stage residual converges at the **stage order**, which for collocation methods equals the number of stages $q$. Since the objective sums both, **the stage order sets the ceiling** — which is why moving from $q=2$ to $q=3$ matters more than the classical orders alone suggest: it lifts that ceiling from $\mathcal{O}(k^2)$ to $\mathcal{O}(k^3)$. Orders are pinned by `tests/test_rk_order.py`, and the tableaux themselves are re-derived from their nodes and checked against the order conditions in `tests/test_tableau_order.py`.
+The stage residual converges at the **stage order**, which for collocation methods equals the number of stages $q$. Since the objective sums both, **the stage order sets the ceiling** — which is why the stage count matters more than the classical order alone suggests: each added stage lifts that ceiling by one power of $k$, from $\mathcal{O}(k^2)$ at $q=2$ to $\mathcal{O}(k^4)$ at $q=4$. Orders are pinned by `tests/test_rk_order.py`, and the tableaux themselves are re-derived from their nodes and checked against the order conditions in `tests/test_tableau_order.py`.
 
 Lobatto IIIA is *stiffly accurate* — its $b$ equals the last row of $A$ — so its update and final stage residuals coincide exactly.
 

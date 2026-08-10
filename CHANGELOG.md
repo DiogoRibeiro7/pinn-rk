@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-- Nothing yet
+### Fixed
+
+- Four more stale claims in the README, found while reviewing the 0.5.1 accuracy pass:
+  the quick-start comment listed only the three two-stage methods, the strapline and
+  feature list described only the original tableaux, and the stage-order paragraph still
+  stopped at q=3. All now reflect the nine shipped tableaux and the O(k⁴) ceiling.
 
 ## [0.5.1] - 2026-08-10
 
