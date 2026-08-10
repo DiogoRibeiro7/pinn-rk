@@ -1212,10 +1212,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#phase-0-foundations-now" class="md-nav__link">
+  <a href="#where-things-stand" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Phase 0 — Foundations (Now)
+        Where things stand
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-0-foundations-complete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 0 — Foundations (complete)
       
     </span>
   </a>
@@ -1388,11 +1399,59 @@
 <h1 id="pinn-rk-roadmap">pinn-rk • Roadmap<a class="headerlink" href="#pinn-rk-roadmap" title="Permanent link">&para;</a></h1>
 <p>A pragmatic, incremental plan to evolve <strong>pinn-rk</strong> into a robust, research‑grade library for time‑discrete Runge–Kutta PINNs.</p>
 <hr />
-<h2 id="phase-0-foundations-now">Phase 0 — Foundations (Now)<a class="headerlink" href="#phase-0-foundations-now" title="Permanent link">&para;</a></h2>
+<h2 id="where-things-stand">Where things stand<a class="headerlink" href="#where-things-stand" title="Permanent link">&para;</a></h2>
+<p>0.6.0 is on PyPI, archived on Zenodo under concept DOI
+<a href="https://doi.org/10.5281/zenodo.21839391">10.5281/zenodo.21839391</a>, documented at
+<a href="https://diogoribeiro7.github.io/pinn-rk/">https://diogoribeiro7.github.io/pinn-rk/</a>, and green on CI across three operating
+systems and three Python versions.</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 Foundations</td>
+<td>done</td>
+</tr>
+<tr>
+<td>1 Numerical breadth</td>
+<td>done except samplers and switchable BCs</td>
+</tr>
+<tr>
+<td>2 Convergence &amp; stability</td>
+<td>convergence harness only</td>
+</tr>
+<tr>
+<td>3 Performance</td>
+<td>not started</td>
+</tr>
+<tr>
+<td>4 Documentation site</td>
+<td>done except two guide pages</td>
+</tr>
+<tr>
+<td>5 cG/dG in time</td>
+<td>not started</td>
+</tr>
+<tr>
+<td>6 Packaging &amp; releases</td>
+<td>done</td>
+</tr>
+</tbody>
+</table>
+<p>The honest summary of the numerics: the tableau now genuinely drives accuracy, and
+measured stage order tracks the stage count up to q=4, where double precision runs
+out. What is missing is breadth of evidence rather than machinery — manufactured
+solutions, error norms and ablations are all still open.</p>
+<hr />
+<h2 id="phase-0-foundations-complete">Phase 0 — Foundations (complete)<a class="headerlink" href="#phase-0-foundations-complete" title="Permanent link">&para;</a></h2>
 <p><strong>Goal:</strong> Solid engineering baseline.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Module split completed</strong> and public API re‑exports.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Tests</strong>: unit, E2E smoke, API surface, convergence orders. Coverage is 91%
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Tests</strong>: unit, E2E smoke, API surface, convergence orders. Coverage is 93%
   against a target of 85%.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>CI</strong>: ruff, mypy, pytest on 3.10–3.12 across Linux, macOS and Windows.
   Poetry-based dependency caching was <strong>removed deliberately</strong>: <code>setup-python</code>'s
@@ -1400,17 +1459,24 @@
   first is unreliable on macOS, where <code>setup-python</code> replaces the Python that Poetry
   was installed into. The job already caches <code>.venv</code> keyed on <code>poetry.lock</code>, so the
   extra cache bought nothing and broke one matrix entry.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Repo hygiene</strong>: issue/PR templates, dependabot, CODEOWNERS, <code>.gitignore</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Repo hygiene</strong>: issue/PR templates, dependabot, CODEOWNERS, <code>.gitignore</code>.
+  Dependabot alerts are at zero.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Branch protection</strong> on <code>main</code>: require a pull request and a green
+  <strong>All Checks Passed</strong> before merge. Every change since 0.1.0 has gone through a PR
+  with CI green, but nothing enforces it — a direct push to <code>main</code> would succeed
+  today.</li>
 </ul>
 <p><strong>Deliverables</strong></p>
-<ul>
-<li>Passing CI on main</li>
-<li>Coverage badge (Codecov)</li>
-<li>CONTRIBUTING.md, SECURITY.md</li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Passing CI on main</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Coverage badge (Codecov), reporting 93%. Uploads are tokenless, which Codecov
+  warns about on a protected branch; it works, but a <code>CODECOV_TOKEN</code> would make it
+  robust against their rate limits.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> CONTRIBUTING.md, SECURITY.md</li>
 </ul>
 <p><strong>Acceptance</strong></p>
-<ul>
-<li>Green CI, coverage ≥ 85%, pre‑commit passes locally.</li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Green CI, coverage ≥ 85%, pre‑commit passes locally.</li>
 </ul>
 <hr />
 <h2 id="phase-1-numerical-breadth">Phase 1 — Numerical breadth<a class="headerlink" href="#phase-1-numerical-breadth" title="Permanent link">&para;</a></h2>
@@ -1439,16 +1505,16 @@
   default sampler both assume <code>[0,1]^d</code>.
 * [ ] <strong>Boundary handling options</strong>: hard BC via (\phi(x)) vs soft penalty; switchable.</p>
 <p><strong>Deliverables</strong></p>
-<ul>
-<li><code>tableau.py</code> with q=3,4 factories</li>
-<li><code>interpolants.py</code> gains <code>lagrange_basis_and_derivative</code></li>
-<li><code>samplers.py</code> (optional) with Sobol/Halton</li>
-<li>New tests (properties + convergence checks)</li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <code>tableau.py</code> with q=3,4 factories, plus <code>collocation_tableau</code> for any others</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <code>interpolants.py</code> gains the barycentric basis and <code>differentiation_matrix</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>samplers.py</code> with Sobol/Halton</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> New tests (properties + convergence checks)</li>
 </ul>
 <p><strong>Acceptance</strong></p>
-<ul>
-<li>Interpolation tests: partition of unity, node exactness, derivative agreement</li>
-<li>Tiny training runs pass with q=3 on CI</li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Interpolation tests: partition of unity, node exactness, derivative agreement</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Tiny training runs pass with q=3 on CI</li>
 </ul>
 <hr />
 <h2 id="phase-2-convergence-stability-mraligned-design">Phase 2 — Convergence, stability &amp; MR‑aligned design<a class="headerlink" href="#phase-2-convergence-stability-mraligned-design" title="Permanent link">&para;</a></h2>
@@ -1463,9 +1529,12 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Ablations</strong>: BC enforcement (hard vs soft), sampler choice, RK scheme.</li>
 </ul>
 <p><strong>Deliverables</strong></p>
-<ul>
-<li><code>bench/</code> with scripts + results; <code>notebooks/benchmarks.ipynb</code></li>
-<li><code>pinn_rk/metrics.py</code> with L2/H1 estimators</li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Convergence scripts + results. These landed as
+  <code>examples/04_convergence_study.py</code> and <code>examples/notebooks/benchmarking.ipynb</code>
+  rather than a separate <code>bench/</code> directory, which would have duplicated the
+  examples for no gain.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>pinn_rk/metrics.py</code> with L2/H1 estimators</li>
 </ul>
 <p><strong>Acceptance</strong></p>
 <ul>
@@ -1505,16 +1574,22 @@
 <li>API reference via mkdocstrings for all seven modules</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Examples gallery</strong>: two notebooks committed with executed outputs, so the
   plots and error tables render on GitHub without being run.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Guide pages on BC strategies, and a 2D tutorial (blocked on 2D operators)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> A 2D tutorial page. No longer blocked: <code>LaplacianND</code> landed in 0.6.0 and
+  <code>examples/05_2d_heat_equation.py</code> solves the 2D heat equation end to end. What is
+  missing is only the prose.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> A guide page on BC strategies, which needs the soft-BC option from Phase 1
+  first — with only the hard constraint implemented there is nothing to compare.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Links</strong> to paper(s) and comparisons</li>
 </ul>
 <p><strong>Deliverables</strong></p>
-<ul>
-<li><code>docs/</code> + <code>mkdocs.yml</code>; CI job to build; optional Pages deploy</li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <code>docs/</code> + <code>mkdocs.yml</code>, a CI job that builds the site on every pull request,
+  and a Pages deploy. The build step was added after a release shipped with docs that
+  did not build; CI now catches that before merge.</li>
 </ul>
 <p><strong>Acceptance</strong></p>
-<ul>
-<li>Clean site build; internal links validated; examples runnable</li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Clean site build; internal links validated; examples runnable</li>
 </ul>
 <hr />
 <h2 id="phase-5-extended-time-discretisations-optional">Phase 5 — Extended time discretisations (optional)<a class="headerlink" href="#phase-5-extended-time-discretisations-optional" title="Permanent link">&para;</a></h2>
@@ -1559,7 +1634,8 @@
 </ul>
 <p><strong>Acceptance</strong></p>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <code>v0.1.0</code> and <code>v0.2.0</code> released, archived, and citable by DOI</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <code>v0.1.0</code> through <code>v0.6.0</code> released, each archived by Zenodo and citable by its
+  own version DOI under the concept DOI above</li>
 </ul>
 <hr />
 <h2 id="stretch-goals">Stretch goals<a class="headerlink" href="#stretch-goals" title="Permanent link">&para;</a></h2>
@@ -1571,26 +1647,50 @@
 </ul>
 <hr />
 <h2 id="issue-seeds-copypaste-to-github">Issue seeds (copy/paste to GitHub)<a class="headerlink" href="#issue-seeds-copypaste-to-github" title="Permanent link">&para;</a></h2>
+<p>Still open:</p>
 <ul>
-<li>feat: add Radau IIA q=3 tableau + unit tests</li>
-<li><del>feat: implement analytic Lagrange derivative; replace FD in loss</del> — done in v0.2.0</li>
-<li>feat: Sobol sampler; config hook and tests</li>
-<li>feat: Laplacian2D/3D + manufactured solutions</li>
+<li>feat: Sobol/Halton sampler; config hook and tests</li>
+<li>feat: soft boundary penalty as an alternative to the hard ansatz, switchable</li>
+<li>feat: manufactured solutions with non-zero source and time-varying BCs</li>
+<li>feat: rectangular domains — the boundary factor and sampler both assume <code>[0,1]^d</code></li>
+<li>feat: expose the <code>examples</code> and <code>docs</code> groups as pip extras</li>
 <li>test: property‑based tests for interpolation &amp; derivatives (Hypothesis)</li>
 <li>perf: torch.compile + AMP toggle and benchmarks</li>
-<li>docs: MkDocs site with tutorials and API</li>
-<li>bench: convergence harness and plots</li>
-<li><del>release: semantic‑release setup and first tagged release</del> — released manually
-  as v0.1.0 and v0.2.0; semantic‑release dropped, see Phase 6</li>
+<li>docs: 2D tutorial page; BC strategies guide</li>
+<li>chore: branch protection on <code>main</code></li>
+</ul>
+<p>Closed:</p>
+<ul>
+<li><del>feat: add Radau IIA q=3 tableau + unit tests</del> — v0.4.0, alongside q=4 in v0.5.0</li>
+<li><del>feat: implement analytic Lagrange derivative; replace FD in loss</del> — v0.2.0</li>
+<li><del>feat: Laplacian2D/3D</del> — v0.6.0, as <code>LaplacianND</code> for arbitrary <code>d</code></li>
+<li><del>docs: MkDocs site with tutorials and API</del> — v0.4.0, deployed to Pages</li>
+<li><del>bench: convergence harness and plots</del> — v0.4.0</li>
+<li><del>release: semantic‑release setup and first tagged release</del> — released
+  manually from v0.1.0 to v0.6.0; semantic‑release dropped, see Phase 6</li>
 </ul>
 <hr />
 <h2 id="versioning-plan">Versioning plan<a class="headerlink" href="#versioning-plan" title="Permanent link">&para;</a></h2>
+<p>Where the releases actually went (details in <a href="./CHANGELOG.md">CHANGELOG.md</a>):</p>
 <ul>
-<li><strong>v0.1.x</strong> – Foundations + q=2 RK + tests/CI</li>
-<li><strong>v0.2.x</strong> – Phase 1–3 features, docs draft</li>
-<li><strong>v0.3.x</strong> – cG/dG optional backends, broader PDE gallery</li>
+<li><strong>v0.1.0</strong> – Foundations: module split, tests, CI, first DOI</li>
+<li><strong>v0.2.0</strong> – Analytic Lagrange time derivative in place of finite differences</li>
+<li><strong>v0.3.0</strong> – The stage equations, which bring the Butcher <code>A</code> matrix into the loss</li>
+<li><strong>v0.4.0</strong> – q=3 tableaux, convergence harness, notebooks, docs site</li>
+<li><strong>v0.5.0</strong> – q=4 tableaux and <code>collocation_tableau</code> (v0.5.1 reconciled the docs
+  with what the code does)</li>
+<li><strong>v0.6.0</strong> – Multi-dimensional domains, and publication to PyPI</li>
+</ul>
+<p>Ahead, subject to change:</p>
+<ul>
+<li><strong>v0.7.x</strong> – Samplers, switchable BCs, manufactured solutions (rest of Phases 1–2)</li>
+<li><strong>v0.8.x</strong> – Performance: <code>torch.compile</code>, AMP, profiling (Phase 3)</li>
+<li><strong>v0.9.x</strong> – cG/dG optional backends, broader PDE gallery (Phase 5)</li>
 <li><strong>v1.0.0</strong> – Stable API, documented guarantees, benchmarks</li>
 </ul>
+<p>The API has been additive since 0.1.0: every release added configuration or tableaux
+without breaking a documented call. <code>1.0.0</code> is the point at which that becomes a
+promise rather than an observation.</p>
 
 
 
@@ -1613,7 +1713,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 18:47:43 UTC"><span class="timeago" datetime="2026-08-10T18:47:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 18:47:43 UTC">2026-08-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 19:32:06 UTC"><span class="timeago" datetime="2026-08-10T19:32:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 19:32:06 UTC">2026-08-10</span>
   </span>
 
     
