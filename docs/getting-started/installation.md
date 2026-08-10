@@ -9,6 +9,19 @@
 outputs by the slab size `k`, which amplifies rounding error by `1/k`; in `float32` that
 noise can swamp the quantity being minimised.
 
+## From PyPI
+
+```bash
+pip install pinn-rk
+```
+
+That is the library and its only runtime dependencies, `numpy` and `torch`.
+
+!!! note "The optional groups are not pip extras"
+    `matplotlib`, `jupyter`, `plotly` and the docs toolchain are Poetry *groups*, not
+    pip *extras*, so `pip install "pinn-rk[examples]"` does not work. Install from a
+    clone if you want the notebooks or the plotting flags.
+
 ## From source
 
 ```bash
