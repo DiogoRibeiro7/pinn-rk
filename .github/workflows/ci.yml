@@ -33,7 +33,7 @@ jobs:
           # installed into. The explicit .venv cache below covers this anyway.
 
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@v4
         with:
           poetry-version: "2.2.1"
 
@@ -118,7 +118,7 @@ jobs:
           python-version: "3.11"
           
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@v4
         with:
           poetry-version: "2.2.1"
           
@@ -145,7 +145,7 @@ jobs:
           python-version: "3.11"
           
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@v4
         with:
           poetry-version: "2.2.1"
           
@@ -175,7 +175,7 @@ jobs:
           python-version: "3.11"
           
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@v4
         with:
           poetry-version: "2.2.1"
           
@@ -219,7 +219,7 @@ jobs:
       # stayed green. mkdocstrings imports the package to read its docstrings, so the
       # project and its docs group both have to be installed.
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@v4
         with:
           poetry-version: "2.2.1"
 
@@ -243,7 +243,7 @@ jobs:
           python-version: "3.11"
           
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@v4
         with:
           poetry-version: "2.2.1"
           
