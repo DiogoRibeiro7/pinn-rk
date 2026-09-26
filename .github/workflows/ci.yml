@@ -209,10 +209,12 @@ jobs:
       # docs dependency could break https://diogoribeiro7.github.io/pinn-rk/ while CI
       # stayed green. mkdocstrings imports the package to read its docstrings, so the
       # project and its docs group both have to be installed.
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
+      - name: Set up Poetry
+        uses: DiogoRibeiro7/git-actions-collection/.github/actions/setup-poetry@v1
         with:
+          python-version: "3.11"
           poetry-version: "2.2.1"
+          install-deps: "false"
 
       - name: Install docs dependencies
         run: poetry install --no-interaction --with docs
