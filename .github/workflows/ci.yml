@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -110,7 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Set up Python and Poetry
         uses: DiogoRibeiro7/git-actions-collection/.github/actions/setup-poetry@v1
@@ -134,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Set up Python and Poetry
         uses: DiogoRibeiro7/git-actions-collection/.github/actions/setup-poetry@v1
@@ -161,7 +161,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Set up Python and Poetry
         uses: DiogoRibeiro7/git-actions-collection/.github/actions/setup-poetry@v1
@@ -190,7 +190,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -228,7 +228,7 @@ jobs:
     needs: [test, lint-only, type-check]
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Set up Python and Poetry
         uses: DiogoRibeiro7/git-actions-collection/.github/actions/setup-poetry@v1
@@ -288,7 +288,7 @@ jobs:
     if: github.event_name == 'pull_request'
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       
       - name: Download coverage reports
         uses: actions/download-artifact@v4
