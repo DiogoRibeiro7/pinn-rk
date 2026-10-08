@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/project-avatar.png" alt="pinn-rk project logo" width="160" height="160">
+</p>
+
 # pinn-rk
 
 <p align="center">

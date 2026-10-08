@@ -1,0 +1,3 @@
+Tool: built-in image generation
+
+Use case: logo-brand. Create a square project emblem for the GitHub repository pinn-rk. Subject: An ivory flowing physical wave linked to three gold neural-network nodes along a short stepping arc, representing physics-informed neural networks and time integration. Family style: polished editorial illustration with bold softly sculpted forms, ivory and warm gold on a plain midnight-navy background, matching a family of research-project avatars. One balanced centered emblem with generous margins and few elements; clearly recognizable at 192 pixels. No words, letters, numbers, watermark, frame, or decorative clutter.
